@@ -50,3 +50,14 @@ Emulator sollte starten
 flutter run
 
 Die flutter App sollte auf dem Emulator starten
+
+## Git Pull Request
+
+Jedes neue Feature eine neue Branch erstellen:
+git checkout -b update-readme-pullrequest 
+
+Branch veröffentlichen und Änderungen machen danach Commit
+
+Erstellen eines Pull Request: 
+git push origin update-readme-pullrequest
+
