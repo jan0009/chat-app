@@ -3,6 +3,7 @@ import 'package:chatapp/components/MyButton.dart';
 import 'package:chatapp/components/MyTextField.dart';
 import 'package:flutter/material.dart';
 import 'package:chatapp/View/Pages/register_page.dart';
+import 'package:chatapp/View/Pages/home_page.dart';
 
 class LoginPage extends StatelessWidget {
   LoginPage({super.key});
@@ -12,13 +13,20 @@ class LoginPage extends StatelessWidget {
   final passwordController = TextEditingController();
 
   //Sign In
-  void signUserIn(){}
+  void signUserIn(BuildContext context){
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => HomePage(),
+      ),
+    );
+  }
 
     void startRegister(BuildContext context) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => const RegisterPage(),
+        builder: (context) => RegisterPage(),
       ),
     );
   }
@@ -28,6 +36,7 @@ class LoginPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFFb9d0e2),
+      
       body: SafeArea(
         child: Center(
           child: Column(
@@ -79,7 +88,7 @@ class LoginPage extends StatelessWidget {
 
             //Sign in Button
             MyButton(
-              onTap: signUserIn,
+              onTap: () => signUserIn(context),
               buttonText: "Sign In",
               fontSize: 16,
               backgroundColor: Color(0xFF3A7CA5),
