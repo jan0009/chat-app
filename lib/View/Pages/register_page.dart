@@ -1,47 +1,31 @@
-//stless
+import 'package:flutter/material.dart';
 import 'package:chatapp/components/MyButton.dart';
 import 'package:chatapp/components/MyTextField.dart';
-import 'package:flutter/material.dart';
-import 'package:chatapp/View/Pages/register_page.dart';
-import 'package:chatapp/View/Pages/home_page.dart';
 
-class LoginPage extends StatelessWidget {
-  LoginPage({super.key});
+class RegisterPage extends StatelessWidget {
+  RegisterPage({super.key});
 
-  //text editing controllers
   final userNameController = TextEditingController();
   final passwordController = TextEditingController();
+  final nickNameController = TextEditingController();
+  final fullNameController = TextEditingController();
 
-  //Sign In
-  void signUserIn(BuildContext context){
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => HomePage(),
-      ),
-    );
-  }
-
-    void startRegister(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => RegisterPage(),
-      ),
-    );
-  }
-
+  void register(){}
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFFb9d0e2),
-      
+      appBar: AppBar(
+        title: Text('Home'),
+        backgroundColor: Color(0xFFb9d0e2),
+        
+      ) ,
       body: SafeArea(
         child: Center(
           child: Column(
           children:  [
-            const SizedBox(height: 100),
+            const SizedBox(height: 10),
 
             //Logo
             Center(
@@ -51,13 +35,9 @@ class LoginPage extends StatelessWidget {
               ),
             ),
           
-
-          
-            const SizedBox(height: 15),
-
-            //Welcome 
+             
             Text(
-              'Welcome!',
+              'Register',
               style: TextStyle(
                 color: Color(0xFF16425B),
                 fontSize: 20,
@@ -82,31 +62,34 @@ class LoginPage extends StatelessWidget {
               obscureText: true,
             ),
 
+            const SizedBox(height: 10),
+            //Nickname Textfield
+            MyTextField(
+              controller: nickNameController,
+               hintText: 'Nickname',
+               obscureText: false
+            ),
+
+            const SizedBox(height: 10),
+
+            //Fullname Textfield
+            MyTextField(
+              controller: fullNameController,
+               hintText: 'Fullname',
+               obscureText: false
+            ),
 
             
             const SizedBox(height: 25),
 
             //Sign in Button
             MyButton(
-              onTap: () => signUserIn(context),
-              buttonText: "Sign In",
+              onTap: register,
+              buttonText: "Register",
               fontSize: 16,
               backgroundColor: Color(0xFF3A7CA5),
-            ),
-
-            const SizedBox(height: 150),
-
-            //Register
-            MyButton(
-              onTap: () => startRegister(context),
-              buttonText: "Register here!",
-              fontSize: 14,
-              margin: const EdgeInsets.symmetric(horizontal: 10),
-              padding: const EdgeInsets.all(10),
-              backgroundColor: Color(0xFF3A7CA5),
-              )
-            
-                ],),
+            ),  
+          ],),
         ),
     ) 
     );
