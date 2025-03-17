@@ -19,27 +19,31 @@ class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[300],
+      backgroundColor: Color(0xFFb9d0e2),
       body: SafeArea(
         child: Center(
           child: Column(
           children:  [
-            const SizedBox(height: 50),
+            const SizedBox(height: 100),
 
             //Logo
-            const Icon(
-            Icons.lock,
-            size: 100,
-            
+            Center(
+              child: Image.asset(
+              'lib/images/Logo.png',
+              height: 250,
+              ),
             ),
-            const SizedBox(height: 50),
+          
+
+          
+            const SizedBox(height: 15),
 
             //Welcome 
             Text(
               'Welcome!',
               style: TextStyle(
-                color: Colors.grey[700],
-                fontSize: 16,
+                color: Color(0xFF16425B),
+                fontSize: 20,
                 ),
               ),
 
@@ -70,10 +74,10 @@ class LoginPage extends StatelessWidget {
               onTap: signUserIn,
               buttonText: "Sign In",
               fontSize: 16,
-              
+              backgroundColor: Color(0xFF3A7CA5),
             ),
 
-            const SizedBox(height: 300),
+            const SizedBox(height: 150),
 
             //Register
             MyButton(onTap: startRegister,
@@ -81,7 +85,7 @@ class LoginPage extends StatelessWidget {
              fontSize: 14,
               margin: const EdgeInsets.symmetric(horizontal: 10),
               padding: const EdgeInsets.all(10),
-              backgroundColor: Colors.black,
+              backgroundColor: Color(0xFF3A7CA5),
               )
             
                 ],),
