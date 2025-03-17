@@ -2,6 +2,7 @@
 import 'package:chatapp/components/MyButton.dart';
 import 'package:chatapp/components/MyTextField.dart';
 import 'package:flutter/material.dart';
+import 'package:chatapp/View/Pages/register_page.dart';
 
 class LoginPage extends StatelessWidget {
   LoginPage({super.key});
@@ -13,7 +14,14 @@ class LoginPage extends StatelessWidget {
   //Sign In
   void signUserIn(){}
 
-  void startRegister(){}
+    void startRegister(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const RegisterPage(),
+      ),
+    );
+  }
 
 
   @override
@@ -76,9 +84,10 @@ class LoginPage extends StatelessWidget {
             const SizedBox(height: 300),
 
             //Register
-            MyButton(onTap: startRegister,
-             buttonText: "Register here!",
-             fontSize: 14,
+            MyButton(
+              onTap: () => startRegister(context),
+              buttonText: "Register here!",
+              fontSize: 14,
               margin: const EdgeInsets.symmetric(horizontal: 10),
               padding: const EdgeInsets.all(10),
               backgroundColor: Colors.black,
