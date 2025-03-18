@@ -1,4 +1,4 @@
-class UserLogin {
+class UserRegister {
   final bool success;
   final String message;
   final String token;
@@ -6,7 +6,7 @@ class UserLogin {
   final String status;
   final int code;
 
-  UserLogin({
+  UserRegister({
     required this.success,
     required this.message,
     required this.token,
@@ -15,30 +15,33 @@ class UserLogin {
     required this.code,
   });
 
-  factory UserLogin.fromJson(Map<String, dynamic> json){
+  factory UserRegister.fromJson(Map<String, dynamic> json) {
     bool isSuccess = (json['status'] == "ok" && json['code'] == 200);
 
-    return UserLogin(
+    return UserRegister(
       success: isSuccess,
       message: json['message'],
       status: json['status'],
       code: json['code'],
-      token: isSuccess ? json['token'] : null,  
+      token: isSuccess ? json['token'] : null,
       hash: isSuccess ? json['hash'] : null,
     );
+  }
 }
-}
+// First Registration
 
 // {
-//     "message": "Logged in",
-//     "token": "VbdLtSyV",
-//     "hash": "27vggjYB",
+//     "message": "Registered",
+//     "token": "EEiBVROJ",
+//     "hash": "0rqgmIFi",
 //     "status": "ok",
 //     "code": 200
 // }
 
+// Already Registered
+
 // {
 //     "status": "error",
-//     "message": "Wrong password: '1'",
-//     "code": 455
+//     "message": "User 'jadrit00' already exists",
+//     "code": 452
 // }

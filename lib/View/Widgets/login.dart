@@ -21,12 +21,6 @@ class LoginPage extends StatelessWidget {
   final logger = Logger();
 
   // //Sign In
-  // void signUserIn(BuildContext context) {
-  //   Navigator.push(
-  //     context,
-  //     MaterialPageRoute(builder: (context) => HomePage()),
-  //   );
-  // }
 
   void startRegister(BuildContext context) {
     Navigator.push(

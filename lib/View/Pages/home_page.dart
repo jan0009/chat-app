@@ -1,5 +1,6 @@
 //stless
 import 'package:chatapp/Shared/Constants/ApiConstants.dart';
+import 'package:chatapp/View/Entities/user_deregister.dart';
 import 'package:chatapp/View/Entities/user_logout.dart';
 import 'package:chatapp/View/Widgets/login.dart';
 import 'package:chatapp/components/MyButton.dart';
@@ -19,45 +20,83 @@ class HomePage extends StatelessWidget {
     // Store ScaffoldMessengerState before async operation
     final messenger = ScaffoldMessenger.of(context);
 
-    // Retrieve the token
+    // Get token from Secure Storage
     String? token = await secureStorage.read(key: "auth_token");
 
     if (token != null) {
       try {
         UserLogout? userLogout = await fetchApiLogout(token);
-        if(userLogout != null ){
+        if (userLogout != null) {
           messenger.showSnackBar(
             SnackBar(
               content: Text(userLogout.message),
-              duration: Duration(seconds: 3),
+              duration: Duration(seconds: 4),
             ),
           );
+          if (userLogout.success == true) {
+            bool hasToken = await secureStorage.containsKey(key: "auth_token");
+            if (hasToken) {
+              await secureStorage.delete(key: "auth_token");
+            }
+          }
         }
       } catch (error) {
         messenger.showSnackBar(
           SnackBar(
             content: Text("Fehler beim Logout: $error"),
-            duration: Duration(seconds: 3),
+            duration: Duration(seconds: 8),
           ),
         );
       }
 
-    // Token nach erfolgreichem Logout löschen
-    await secureStorage.delete(key: "auth_token");
+      // Token nach erfolgreichem Logout löschen
+      await secureStorage.delete(key: "auth_token");
     }
   }
 
-  // void handleLogout() async {
-  // UserLogin? userLogin = await fetchApiLogin();
+  Future<void> handleDeregister(BuildContext context) async {
+    // Store ScaffoldMessengerState before async operation
+    final messenger = ScaffoldMessenger.of(context);
 
-  // if (userLogin == null) {
-  //   logger.e('❌ Fehler: Login-API hat null zurückgegeben.');
-  //   return false; // Falls die API fehlschlägt, wird `false` zurückgegeben
-  // }
+    // Get token from Secure Storage
+    String? token = await secureStorage.read(key: "auth_token");
 
-  // return userLogin.success;
+    if (token != null) {
+      try {
+        UserDeregister? userDeregister = await fetchApiDeregister(token);
+        if (userDeregister != null) {
+          messenger.showSnackBar(
+            SnackBar(
+              content: Text(userDeregister.message),
+              duration: Duration(seconds: 4),
+            ),
+          );
+          if (userDeregister.success == true) {
+            bool hasToken = await secureStorage.containsKey(key: "auth_token");
+            bool hasUserId = await secureStorage.containsKey(key: "userid");
+            bool hasPassword = await secureStorage.containsKey(key: "password");
 
-  // }
+            if (hasToken) {
+              await secureStorage.delete(key: "auth_token");
+            }
+            if (hasUserId) {
+              await secureStorage.delete(key: "auth_token");
+            }
+            if (hasPassword) {
+              await secureStorage.delete(key: "auth_token");
+            }
+          }
+        }
+      } catch (error) {
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text("Fehler beim Logout: $error"),
+            duration: Duration(seconds: 8),
+          ),
+        );
+      }
+    }
+  }
 
   Future<UserLogout?> fetchApiLogout(String token) async {
     try {
@@ -82,7 +121,28 @@ class HomePage extends StatelessWidget {
     }
   }
 
-  void deregister() {}
+  Future<UserDeregister?> fetchApiDeregister(String token) async {
+    try {
+      String apiUrl =
+          '${ApiConstants.baseUrl}'
+          '${ApiConstants.getDeregister}'
+          '&token=$token';
+
+      final uri = Uri.parse(apiUrl);
+      final response = await http.get(uri);
+
+      if (response.statusCode == 200) {
+        return UserDeregister.fromJson(jsonDecode(response.body));
+      } else {
+        logger.d('API Fehler: ${response.statusCode} - $apiUrl');
+        return null;
+      }
+    } catch (e, stacktrace) {
+      logger.e('🚨 Fehler beim Abrufen der API: $e');
+      logger.e('📜 Stacktrace: $stacktrace');
+      return null; // Verhindert App-Absturz
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -124,7 +184,14 @@ class HomePage extends StatelessWidget {
 
               //Register
               MyButton(
-                onTap: deregister,
+                onTap: () async {
+                  await handleDeregister(context);
+                  if (!context.mounted) return;
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => LoginPage()),
+                  );
+                },
                 buttonText: "Deregister",
                 fontSize: 14,
                 margin: const EdgeInsets.symmetric(horizontal: 10),

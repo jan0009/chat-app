@@ -1,17 +1,17 @@
-class UserLogout {
+class UserDeregister {
   final bool success;
   final String message;
   final String status;
   final int code;
 
-  UserLogout({
+  UserDeregister({
     required this.success,
     required this.message,
     required this.status,
     required this.code,
   });
 
-  factory UserLogout.fromJson(Map<String, dynamic> json) => UserLogout(
+  factory UserDeregister.fromJson(Map<String, dynamic> json) => UserDeregister(
     success: (json['status'] == "ok" && json['code'] == 200),
     message: json['message'],
     status: json['status'],
@@ -20,7 +20,7 @@ class UserLogout {
 }
 
 // {
-//     "message": "Logged out",
+//     "message": "Deregistered",
 //     "status": "ok",
 //     "code": 200
 // }
