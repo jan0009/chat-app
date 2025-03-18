@@ -8,7 +8,7 @@ class UserLogout {
   final bool success;
   final String message;
   final String status;
-  final String code;
+  final int code;
 
   UserLogout({
     required this.success,
@@ -20,7 +20,7 @@ class UserLogout {
   factory UserLogout.fromJson(Map<String, dynamic> json) => UserLogout(
     success: (json['status'] == "ok" && json['code'] == 200),
     message: json['message'],
-    status: json['token'],
-    code: json['hash'],
+    status: json['status'],
+    code: json['code'],
   );
 }

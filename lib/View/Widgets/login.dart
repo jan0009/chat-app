@@ -6,6 +6,7 @@ import 'package:chatapp/View/Pages/register_page.dart';
 import 'package:chatapp/components/MyButton.dart';
 import 'package:chatapp/components/MyTextField.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:logger/logger.dart';
@@ -16,7 +17,7 @@ class LoginPage extends StatelessWidget {
   //text editing controllers
   final userNameController = TextEditingController();
   final passwordController = TextEditingController();
-
+  final FlutterSecureStorage secureStorage = FlutterSecureStorage();
   final logger = Logger();
 
   // //Sign In
@@ -60,7 +61,9 @@ class LoginPage extends StatelessWidget {
       final response = await http.get(uri);
 
       if (response.statusCode == 200) {
-        return UserLogin.fromJson(jsonDecode(response.body));
+        UserLogin user = UserLogin.fromJson(jsonDecode(response.body));
+        await secureStorage.write(key: "auth_token", value: user.token);
+        return user;
       } else {
         logger.d('API Fehler: ${response.statusCode} - $apiUrl');
         return null;
