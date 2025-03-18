@@ -12,6 +12,8 @@ class RegisterPage extends StatelessWidget {
 
   void register(){}
 
+  void login(){}
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
