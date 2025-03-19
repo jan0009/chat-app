@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:chatapp/View/Pages/test_page.dart';
 import 'package:chatapp/View/Widgets/login.dart';
 
 void main() {
@@ -13,9 +12,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: LoginPage()
-      //WidgetTestPage()
-      
+      home: LoginPage()      
     );
   }
 }
