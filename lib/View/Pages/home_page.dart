@@ -175,9 +175,9 @@ void goToAccountPage(BuildContext context) {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(0xFF3A7CA5), // Deine Farbpalette
+        backgroundColor: const Color(0xFF3A7CA5),
         title: const Text(
-          "Home",  // Titel der Home-Seite
+          "Home",  
           style: TextStyle(
             color: Colors.white,
             fontSize: 20,
@@ -186,14 +186,14 @@ void goToAccountPage(BuildContext context) {
         ),
         centerTitle: true,
         
-        // ➤ Logout-Icon (links)
+        
         leading: IconButton(
           icon: const Icon(Icons.logout, color: Colors.white),
-          onPressed: () => handleLogout(context), // Deine angepasste Logout-Logik
+          onPressed: () => handleLogout(context), 
         ),
 
 
-        // ➤ Account-Icon (rechts)
+        
         actions: [
           IconButton(
             icon: const Icon(Icons.account_circle, color: Colors.white),
@@ -201,7 +201,7 @@ void goToAccountPage(BuildContext context) {
           ),
         ],
 
-        elevation: 4.0, // Optional: Schatten für modernen Look
+        elevation: 4.0, 
       ),
 
       backgroundColor: Color(0xFFb9d0e2),
@@ -209,14 +209,11 @@ void goToAccountPage(BuildContext context) {
         child: Center(
           child: Column(
             children: [
-              //Logo
-              Center(child: Image.asset('lib/images/Logo.png', height: 50)),
 
-              //Welcome
-              Text(
-                'Welcome!',
-                style: TextStyle(color: Color(0xFF16425B), fontSize: 20),
-              ),
+              //Logo
+              Center(child: Image.asset('lib/images/Logo.png', height: 200)),
+
+              
 
               const SizedBox(height: 50),
 
