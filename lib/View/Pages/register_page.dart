@@ -57,7 +57,9 @@ class RegisterPage extends StatelessWidget {
       final response = await http.get(uri);
 
       if (response.statusCode == 200) {
-        UserRegister userRegister = UserRegister.fromJson(jsonDecode(response.body));
+        UserRegister userRegister = UserRegister.fromJson(
+          jsonDecode(response.body),
+        );
         await secureStorage.write(key: "auth_token", value: userRegister.token);
         await secureStorage.write(key: "userid", value: userid);
         await secureStorage.write(key: "password", value: password);

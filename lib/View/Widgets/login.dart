@@ -56,6 +56,7 @@ class LoginPage extends StatelessWidget {
 
       if (response.statusCode == 200) {
         UserLogin user = UserLogin.fromJson(jsonDecode(response.body));
+        await secureStorage.write(key: "userId", value: user.userid);
         await secureStorage.write(key: "auth_token", value: user.token);
         return user;
       } else {

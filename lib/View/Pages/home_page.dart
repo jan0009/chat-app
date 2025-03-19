@@ -1,10 +1,8 @@
 //stless
 import 'package:chatapp/Shared/Constants/ApiConstants.dart';
-import 'package:chatapp/View/Entities/user_deregister.dart';
 import 'package:chatapp/View/Entities/user_logout.dart';
 import 'package:chatapp/View/Pages/account_page.dart';
 import 'package:chatapp/View/Pages/chat_page.dart';
-import 'package:chatapp/View/Widgets/login.dart';
 import 'package:chatapp/components/MyButton.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -12,13 +10,32 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:logger/logger.dart';
 
-class HomePage extends StatelessWidget {
-  HomePage({super.key});
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  String? userId;
+
+  @override
+void initState() {
+  super.initState();
+  fetchChatsFromServer(); 
+  _loadUserId();
+}
 
   final FlutterSecureStorage secureStorage = FlutterSecureStorage();
   final logger = Logger();
 
-  
+  Future<void> _loadUserId() async {
+    String? storedUserId = await secureStorage.read(key: "userId");
+    setState(() {
+      userId = storedUserId;
+    });
+  }
 
   Future<void> handleLogout(BuildContext context) async {
     // Store ScaffoldMessengerState before async operation
@@ -119,46 +136,30 @@ class HomePage extends StatelessWidget {
         return null;
       }
     } catch (e, stacktrace) {
-      logger.e('🚨 Fehler beim Abrufen der API: $e');
-      logger.e('📜 Stacktrace: $stacktrace');
-      return null; // Verhindert App-Absturz
+      logger.e('Fehler beim Abrufen der API: $e');
+      logger.e('Stacktrace: $stacktrace');
+      return null; 
     }
   }
 
-  // Future<UserDeregister?> fetchApiDeregister(String token) async {
-  //   try {
-  //     String apiUrl =
-  //         '${ApiConstants.baseUrl}'
-  //         '${ApiConstants.getDeregister}'
-  //         '&token=$token';
 
-  //     final uri = Uri.parse(apiUrl);
-  //     final response = await http.get(uri);
-
-  //     if (response.statusCode == 200) {
-  //       return UserDeregister.fromJson(jsonDecode(response.body));
-  //     } else {
-  //       logger.d('API Fehler: ${response.statusCode} - $apiUrl');
-  //       return null;
-  //     }
-  //   } catch (e, stacktrace) {
-  //     logger.e('🚨 Fehler beim Abrufen der API: $e');
-  //     logger.e('📜 Stacktrace: $stacktrace');
-  //     return null; // Verhindert App-Absturz
-  //   }
-  // }
-
-  //Funktion für Weiterleitung an die CHat Page 
-  void goToChat(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const MaterialApp(
-          debugShowCheckedModeBanner: false,
-          home: ChatPage(),
+  void goToChat(BuildContext context, String chatId, String chatName) {
+    if (userId != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ChatPage(
+            chatId: chatId,
+            chatName: chatName,
+            userId: userId!,
+          ),
         ),
-      ),
-    );
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Fehler: Keine userId gefunden.'))
+      );
+    }
   }
 
 void goToAccountPage(BuildContext context) {
@@ -170,7 +171,61 @@ void goToAccountPage(BuildContext context) {
     );
   }
 
+ Future<String?> getToken() async {
+  final token = await secureStorage.read(key: "auth_token");
+  if (token == null) {
+    logger.e("Kein Token gefunden (Token null)");
+  } 
+  return token;
+}
 
+List<Map<String, dynamic>> _chats = []; 
+
+Future<void> fetchChatsFromServer() async {
+  const String apiUrl = '${ApiConstants.baseUrl}${ApiConstants.getChats}';
+
+  String? token = await getToken();
+
+  
+
+  if (token == null) {
+    logger.e("Kein Token gefunden");
+    return;
+  }
+
+  try {
+    final uri = Uri.parse('$apiUrl&token=$token');
+  
+
+    final response = await http.get(uri);
+
+    if (response.statusCode == 200) {
+      
+
+      final Map<String, dynamic> data = jsonDecode(response.body);
+
+      if (data.containsKey('chats')) {
+        setState(() {
+          _chats = (data['chats'] as List<dynamic>).map<Map<String, dynamic>>((chat) {
+            return {
+              'chatid': chat['chatid'].toString(), // ✅ Typ in String umwandeln
+              'chatname': chat['chatname'] ?? 'Unbekannter Chat',
+              'role': chat['role'] ?? 'Unbekannte Rolle', // Optional hinzugefügt
+            };
+          }).toList();
+        });
+      } else {
+        logger.e("Kein 'chats'-Schlüssel in der Antwort gefunden.");
+      }
+
+    } else {
+      logger.e("Fehler beim Abrufen der Chats: ${response.statusCode}");
+      logger.e("Response Body: ${response.body}");
+    }
+  } catch (e) {
+    logger.e("Fehler beim Abrufen der Chats: $e");
+  }
+}
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -205,70 +260,26 @@ void goToAccountPage(BuildContext context) {
       ),
 
       backgroundColor: Color(0xFFb9d0e2),
-      body: SafeArea(
-        child: Center(
-          child: Column(
-            children: [
+      body: _chats.isEmpty
+        ? const Center(child: Text("Keine Chats verfügbar oder Fehler beim Laden.")) // Ladeanzeige
+        : ListView.builder(
+          padding: const EdgeInsets.only(top: 20.0),
+            itemCount: _chats.length,
+            itemBuilder: (context, index) {
+              final chat = _chats[index];
 
-              //Logo
-              Center(child: Image.asset('lib/images/Logo.png', height: 200)),
 
-              
-
-              const SizedBox(height: 50),
-
-              /*//Log out Button
-              MyButton(
-                onTap: () async {
-                  await handleLogout(context);
-                  if (!context.mounted) return;
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => LoginPage()),
-                  );
-                },
-                buttonText: "Log-Out",
-                fontSize: 14,
-                backgroundColor: Color(0xFF3A7CA5),
-                margin: const EdgeInsets.symmetric(horizontal: 10),
-                padding: const EdgeInsets.all(10),
-              ),
-
-              const SizedBox(height: 50),
-              */
-
-              //Register
-              // MyButton(
-              //   onTap: () async {
-              //     await handleDeregister(context);
-              //     if (!context.mounted) return;
-              //     Navigator.pushReplacement(
-              //       context,
-              //       MaterialPageRoute(builder: (context) => LoginPage()),
-              //     );
-              //   },
-              //   buttonText: "Deregister",
-              //   fontSize: 14,
-              //   margin: const EdgeInsets.symmetric(horizontal: 10),
-              //   padding: const EdgeInsets.all(10),
-              //   backgroundColor: Color(0xFF3A7CA5),
-              // ),
-
-              // const SizedBox(height: 50),
-
-              MyButton(
-                onTap: () => goToChat(context),
-                buttonText: "Chat",
+              return MyButton(
+                onTap: () => goToChat(context, chat['chatid'], chat['chatname']),
+                buttonText: chat['chatname'], // Dynamischer Chatname
                 fontSize: 14,
                 margin: const EdgeInsets.symmetric(horizontal: 10),
                 padding: const EdgeInsets.all(10),
-                backgroundColor: Color(0xFF3A7CA5),
-              ),
-            ],
+                backgroundColor: const Color(0xFF3A7CA5),
+              );
+            },
           ),
-        ),
-      ),
-    );
+          );
     
   }
 }
