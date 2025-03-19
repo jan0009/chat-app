@@ -2,6 +2,8 @@
 import 'package:chatapp/Shared/Constants/ApiConstants.dart';
 import 'package:chatapp/View/Entities/user_deregister.dart';
 import 'package:chatapp/View/Entities/user_logout.dart';
+import 'package:chatapp/View/Pages/account_page.dart';
+import 'package:chatapp/View/Pages/chat_page.dart';
 import 'package:chatapp/View/Widgets/login.dart';
 import 'package:chatapp/components/MyButton.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +17,8 @@ class HomePage extends StatelessWidget {
 
   final FlutterSecureStorage secureStorage = FlutterSecureStorage();
   final logger = Logger();
+
+  
 
   Future<void> handleLogout(BuildContext context) async {
     // Store ScaffoldMessengerState before async operation
@@ -54,49 +58,49 @@ class HomePage extends StatelessWidget {
     }
   }
 
-  Future<void> handleDeregister(BuildContext context) async {
-    // Store ScaffoldMessengerState before async operation
-    final messenger = ScaffoldMessenger.of(context);
+  // Future<void> handleDeregister(BuildContext context) async {
+  //   // Store ScaffoldMessengerState before async operation
+  //   final messenger = ScaffoldMessenger.of(context);
 
-    // Get token from Secure Storage
-    String? token = await secureStorage.read(key: "auth_token");
+  //   // Get token from Secure Storage
+  //   String? token = await secureStorage.read(key: "auth_token");
 
-    if (token != null) {
-      try {
-        UserDeregister? userDeregister = await fetchApiDeregister(token);
-        if (userDeregister != null) {
-          messenger.showSnackBar(
-            SnackBar(
-              content: Text(userDeregister.message),
-              duration: Duration(seconds: 4),
-            ),
-          );
-          if (userDeregister.success == true) {
-            bool hasToken = await secureStorage.containsKey(key: "auth_token");
-            bool hasUserId = await secureStorage.containsKey(key: "userid");
-            bool hasPassword = await secureStorage.containsKey(key: "password");
+  //   if (token != null) {
+  //     try {
+  //       UserDeregister? userDeregister = await fetchApiDeregister(token);
+  //       if (userDeregister != null) {
+  //         messenger.showSnackBar(
+  //           SnackBar(
+  //             content: Text(userDeregister.message),
+  //             duration: Duration(seconds: 4),
+  //           ),
+  //         );
+  //         if (userDeregister.success == true) {
+  //           bool hasToken = await secureStorage.containsKey(key: "auth_token");
+  //           bool hasUserId = await secureStorage.containsKey(key: "userid");
+  //           bool hasPassword = await secureStorage.containsKey(key: "password");
 
-            if (hasToken) {
-              await secureStorage.delete(key: "auth_token");
-            }
-            if (hasUserId) {
-              await secureStorage.delete(key: "auth_token");
-            }
-            if (hasPassword) {
-              await secureStorage.delete(key: "auth_token");
-            }
-          }
-        }
-      } catch (error) {
-        messenger.showSnackBar(
-          SnackBar(
-            content: Text("Fehler beim Logout: $error"),
-            duration: Duration(seconds: 8),
-          ),
-        );
-      }
-    }
-  }
+  //           if (hasToken) {
+  //             await secureStorage.delete(key: "auth_token");
+  //           }
+  //           if (hasUserId) {
+  //             await secureStorage.delete(key: "auth_token");
+  //           }
+  //           if (hasPassword) {
+  //             await secureStorage.delete(key: "auth_token");
+  //           }
+  //         }
+  //       }
+  //     } catch (error) {
+  //       messenger.showSnackBar(
+  //         SnackBar(
+  //           content: Text("Fehler beim Logout: $error"),
+  //           duration: Duration(seconds: 8),
+  //         ),
+  //       );
+  //     }
+  //   }
+  // }
 
   Future<UserLogout?> fetchApiLogout(String token) async {
     try {
@@ -121,32 +125,85 @@ class HomePage extends StatelessWidget {
     }
   }
 
-  Future<UserDeregister?> fetchApiDeregister(String token) async {
-    try {
-      String apiUrl =
-          '${ApiConstants.baseUrl}'
-          '${ApiConstants.getDeregister}'
-          '&token=$token';
+  // Future<UserDeregister?> fetchApiDeregister(String token) async {
+  //   try {
+  //     String apiUrl =
+  //         '${ApiConstants.baseUrl}'
+  //         '${ApiConstants.getDeregister}'
+  //         '&token=$token';
 
-      final uri = Uri.parse(apiUrl);
-      final response = await http.get(uri);
+  //     final uri = Uri.parse(apiUrl);
+  //     final response = await http.get(uri);
 
-      if (response.statusCode == 200) {
-        return UserDeregister.fromJson(jsonDecode(response.body));
-      } else {
-        logger.d('API Fehler: ${response.statusCode} - $apiUrl');
-        return null;
-      }
-    } catch (e, stacktrace) {
-      logger.e('🚨 Fehler beim Abrufen der API: $e');
-      logger.e('📜 Stacktrace: $stacktrace');
-      return null; // Verhindert App-Absturz
-    }
+  //     if (response.statusCode == 200) {
+  //       return UserDeregister.fromJson(jsonDecode(response.body));
+  //     } else {
+  //       logger.d('API Fehler: ${response.statusCode} - $apiUrl');
+  //       return null;
+  //     }
+  //   } catch (e, stacktrace) {
+  //     logger.e('🚨 Fehler beim Abrufen der API: $e');
+  //     logger.e('📜 Stacktrace: $stacktrace');
+  //     return null; // Verhindert App-Absturz
+  //   }
+  // }
+
+  //Funktion für Weiterleitung an die CHat Page 
+  void goToChat(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const MaterialApp(
+          debugShowCheckedModeBanner: false,
+          home: ChatPage(),
+        ),
+      ),
+    );
   }
+
+void goToAccountPage(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AccountPage(),
+      ),
+    );
+  }
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF3A7CA5), // Deine Farbpalette
+        title: const Text(
+          "Home",  // Titel der Home-Seite
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
+        
+        // ➤ Logout-Icon (links)
+        leading: IconButton(
+          icon: const Icon(Icons.logout, color: Colors.white),
+          onPressed: () => handleLogout(context), // Deine angepasste Logout-Logik
+        ),
+
+
+        // ➤ Account-Icon (rechts)
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.account_circle, color: Colors.white),
+            onPressed: () => goToAccountPage(context),
+          ),
+        ],
+
+        elevation: 4.0, // Optional: Schatten für modernen Look
+      ),
+
       backgroundColor: Color(0xFFb9d0e2),
       body: SafeArea(
         child: Center(
@@ -163,7 +220,7 @@ class HomePage extends StatelessWidget {
 
               const SizedBox(height: 50),
 
-              //Sign in Button
+              /*//Log out Button
               MyButton(
                 onTap: () async {
                   await handleLogout(context);
@@ -181,18 +238,30 @@ class HomePage extends StatelessWidget {
               ),
 
               const SizedBox(height: 50),
+              */
 
               //Register
+              // MyButton(
+              //   onTap: () async {
+              //     await handleDeregister(context);
+              //     if (!context.mounted) return;
+              //     Navigator.pushReplacement(
+              //       context,
+              //       MaterialPageRoute(builder: (context) => LoginPage()),
+              //     );
+              //   },
+              //   buttonText: "Deregister",
+              //   fontSize: 14,
+              //   margin: const EdgeInsets.symmetric(horizontal: 10),
+              //   padding: const EdgeInsets.all(10),
+              //   backgroundColor: Color(0xFF3A7CA5),
+              // ),
+
+              // const SizedBox(height: 50),
+
               MyButton(
-                onTap: () async {
-                  await handleDeregister(context);
-                  if (!context.mounted) return;
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => LoginPage()),
-                  );
-                },
-                buttonText: "Deregister",
+                onTap: () => goToChat(context),
+                buttonText: "Chat",
                 fontSize: 14,
                 margin: const EdgeInsets.symmetric(horizontal: 10),
                 padding: const EdgeInsets.all(10),
@@ -203,5 +272,6 @@ class HomePage extends StatelessWidget {
         ),
       ),
     );
+    
   }
 }
