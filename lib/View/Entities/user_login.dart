@@ -5,6 +5,7 @@ class UserLogin {
   final String hash;
   final String status;
   final int code;
+  final String userid;
 
   UserLogin({
     required this.success,
@@ -13,9 +14,10 @@ class UserLogin {
     required this.hash,
     required this.status,
     required this.code,
+    required this.userid,
   });
 
-  factory UserLogin.fromJson(Map<String, dynamic> json){
+  factory UserLogin.fromJson(Map<String, dynamic> json) {
     bool isSuccess = (json['status'] == "ok" && json['code'] == 200);
 
     return UserLogin(
@@ -23,10 +25,11 @@ class UserLogin {
       message: json['message'],
       status: json['status'],
       code: json['code'],
-      token: isSuccess ? json['token'] : null,  
+      token: isSuccess ? json['token'] : null,
       hash: isSuccess ? json['hash'] : null,
+      userid: json['userid'] ?? '',
     );
-}
+  }
 }
 
 // {

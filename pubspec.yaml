@@ -37,6 +37,7 @@ dependencies:
   flutter_secure_storage: ^9.2.4
   http: ^0.13.6 
   logger: ^2.0.2 
+  flutter_chat_ui: ^1.6.15
 
 dev_dependencies:
   flutter_test:

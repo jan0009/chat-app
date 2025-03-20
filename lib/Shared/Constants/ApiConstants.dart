@@ -5,4 +5,5 @@ class ApiConstants {
   static const String getLogin= "login";
   static const String getLogout= "logout";
   static const String getDeregister = "deregister";
+  static const String getChats = "getchats";
 }
