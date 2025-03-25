@@ -10,6 +10,7 @@ import 'package:logger/logger.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:chatapp/components/My_message.dart';
+import 'package:chatapp/View/Entities/chatmessages.dart';
 
 class ChatPage extends StatefulWidget {
   final String chatId;
@@ -64,19 +65,20 @@ class ChatPageState extends State<ChatPage> {
         if (responseData['messages'] != null) {
           final List<dynamic> messagesData = responseData['messages'];
 
-          setState(() {
-            _messages =
-                messagesData.map<types.Message>((msg) {
-                  return types.TextMessage(
-                    author: types.User(id: msg['userid'].toString()),
-                    createdAt:
-                        DateFormat(
-                          "yyyy-MM-dd_HH-mm-ss",
-                        ).parse(msg['time']).millisecondsSinceEpoch,
-                    id: msg['id'].toString(),
-                    text: msg['text'].toString(),
-                  );
-                }).toList();
+        setState(() {
+          _messages = messagesData.map<types.TextMessage>((msg) {
+            final chatMessage = ChatMessages.fromJson(msg);
+
+            return types.TextMessage(
+              author: types.User(id: chatMessage.userid),
+              createdAt: DateFormat("yyyy-MM-dd_HH-mm-ss").parse(chatMessage.time).millisecondsSinceEpoch,
+              id: chatMessage.id.toString(),
+              text: chatMessage.text,
+              metadata: {
+                'senderName': chatMessage.usernick ?? 'Unbekannt'
+              },
+            );
+          }).toList();
           });
         } else {
           logger.e("Keine Nachrichten im Chat gefunden.");
@@ -104,9 +106,12 @@ class ChatPageState extends State<ChatPage> {
         onSendPressed: _handleSendPressed,
         user: types.User(id: widget.userId),
         customMessageBuilder: (message, {required int messageWidth}) {
+            final senderName = (message as types.TextMessage).metadata?['senderName'] ?? 'Unbekannt';
+
           return MyMessage(
             message: message as types.TextMessage,
             currentUserId: widget.userId,
+            senderName: senderName,
           );
         },
         theme: DefaultChatTheme(
@@ -128,10 +133,15 @@ class ChatPageState extends State<ChatPage> {
       createdAt: DateTime.now().millisecondsSinceEpoch,
       id: 'some-unique-id',
       text: message.text,
-    );
+    
+    metadata: {
+        'senderName': 'Du' 
+      }
+      );
 
     setState(() {
       _messages.insert(0, textMessage);
     });
   }
 }
+
