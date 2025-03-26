@@ -5,11 +5,13 @@ import 'package:intl/intl.dart';
 class MyMessage extends StatelessWidget {
   final types.TextMessage message;
   final String currentUserId;
+  final String senderName;
 
   const MyMessage({
     super.key,
     required this.message,
     required this.currentUserId,
+    required this.senderName,
   });
 
   @override
@@ -19,18 +21,20 @@ class MyMessage extends StatelessWidget {
       DateTime.fromMillisecondsSinceEpoch(message.createdAt ?? 0),
     );
 
+    print("$senderName");
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '${message.author.id} · $time', // Absender & Uhrzeit
+          '$senderName Â· $time', // Absender & Uhrzeit
           style: const TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.bold,
             color: Colors.grey,
           ),
         ),
-        const SizedBox(height: 4), // Abstand zur Nachricht
+        const SizedBox(height: 4), 
         Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(

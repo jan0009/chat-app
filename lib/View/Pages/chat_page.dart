@@ -75,8 +75,11 @@ class ChatPageState extends State<ChatPage> {
                         ).parse(msg['time']).millisecondsSinceEpoch,
                     id: msg['id'].toString(),
                     text: msg['text'].toString(),
+                    metadata: {
+                'senderName': msg['usernick'] ?? 'Unbekannt'
+              },
                   );
-                }).toList();
+                }).toList().reversed.toList();
           });
         } else {
           logger.e("Keine Nachrichten im Chat gefunden.");
@@ -88,6 +91,67 @@ class ChatPageState extends State<ChatPage> {
       logger.e("Fehler beim Abrufen der Nachrichten: $e");
     }
   }
+  Future<void> sendMessageToServer(String messageText) async {
+  //const String apiUrl = '${ApiConstants.baseUrl}postmessage';
+  const String apiUrl =
+          '${ApiConstants.postUrl}';
+          //'${ApiConstants.postmessage}';
+
+     
+  String? token = await secureStorage.read(key: "auth_token");
+  if (token == null) {
+    logger.e("Kein Token gefunden");
+    return;
+  }
+  
+
+  try {
+    final response = await http.post(
+      Uri.parse(apiUrl),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'request': "postmessage",
+        'token': token,
+        'text': messageText,
+        //'chatid': int.parse(widget.chatId),   
+        'chatid': "0",
+  
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      final responseData = jsonDecode(response.body);
+
+      if (responseData['status'] == 'ok') {
+        logger.i("Nachricht erfolgreich gesendet");
+        
+        // Nachricht zur lokalen Anzeige hinzufÃ¼gen
+        final textMessage = types.TextMessage(
+          author: types.User(id: widget.userId),
+          createdAt: DateTime.now().millisecondsSinceEpoch,
+          id: responseData['message-id'].toString(),
+          text: messageText,
+          metadata: {
+            'senderName': 'Du' 
+          }
+        );
+
+        setState(() {
+          _messages.insert(0, textMessage);
+        });
+
+      } else {
+        logger.e("Fehler beim Senden der Nachricht: ${responseData['message']}");
+      }
+    } else {
+      logger.e("Serverfehler beim Senden der Nachricht: ${response.statusCode}");
+    }
+  } catch (e) {
+    logger.e("Fehler beim Senden der Nachricht: $e");
+  }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -104,9 +168,12 @@ class ChatPageState extends State<ChatPage> {
         onSendPressed: _handleSendPressed,
         user: types.User(id: widget.userId),
         customMessageBuilder: (message, {required int messageWidth}) {
+            final senderName = (message as types.TextMessage).metadata?['senderName'] ?? 'Unbekannt';
+
           return MyMessage(
             message: message as types.TextMessage,
             currentUserId: widget.userId,
+            senderName: senderName,
           );
         },
         theme: DefaultChatTheme(
@@ -123,15 +190,6 @@ class ChatPageState extends State<ChatPage> {
   }
 
   void _handleSendPressed(types.PartialText message) {
-    final textMessage = types.TextMessage(
-      author: types.User(id: widget.userId),
-      createdAt: DateTime.now().millisecondsSinceEpoch,
-      id: 'some-unique-id',
-      text: message.text,
-    );
-
-    setState(() {
-      _messages.insert(0, textMessage);
-    });
-  }
+    sendMessageToServer(message.text);
+}
 }
