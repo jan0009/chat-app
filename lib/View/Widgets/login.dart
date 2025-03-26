@@ -29,15 +29,15 @@ class LoginPage extends StatelessWidget {
     );
   }
 
-  Future<bool> handleLogin(BuildContext context) async {
+  Future<UserLogin?> handleLogin(BuildContext context) async {
     UserLogin? userLogin = await fetchApiLogin();
 
     if (userLogin == null) {
       logger.e('❌ Fehler: Login-API hat null zurückgegeben.');
-      return false; // Falls die API fehlschlägt, wird `false` zurückgegeben
+      return null; // Falls die API fehlschlägt, wird `false` zurückgegeben
     }
 
-    return userLogin.success;
+    return userLogin;
   }
 
   Future<UserLogin?> fetchApiLogin() async {
@@ -118,15 +118,30 @@ class LoginPage extends StatelessWidget {
                   final navigator = Navigator.of(context);
                   final messenger = ScaffoldMessenger.of(context);
 
-                  bool loginSuccess = await handleLogin(context);
+                  //bool loginSuccess = await handleLogin(context);
+                  UserLogin? userLogin = await handleLogin(context);
 
-                  if (loginSuccess) {
+                  // if (loginSuccess) {
+                  //   navigator.pushReplacement(
+                  //     MaterialPageRoute(builder: (context) => HomePage(userId: userLogin.userid)),
+                  //   );
+                  // } else {
+                  //   messenger.showSnackBar(
+                  //     SnackBar(
+                  //       content: Text('Login failed. Please try again.'),
+                  //     ),
+                  //   );
+                  if (userLogin != null && userLogin.success) {
                     navigator.pushReplacement(
-                      MaterialPageRoute(builder: (context) => HomePage()),
+                      MaterialPageRoute(
+                        builder:
+                            (context) =>
+                                HomePage(userId: userNameController.text),
+                      ),
                     );
                   } else {
                     messenger.showSnackBar(
-                      SnackBar(
+                      const SnackBar(
                         content: Text('Login failed. Please try again.'),
                       ),
                     );
@@ -141,7 +156,25 @@ class LoginPage extends StatelessWidget {
 
               //Register
               MyButton(
-                onTap: () => startRegister(context),
+                onTap: () async {
+                  final navigator = Navigator.of(context);
+                  final messenger = ScaffoldMessenger.of(context);
+
+                  //bool loginSuccess = await handleLogin(context);
+                  UserLogin? userLogin = await handleLogin(context);
+
+                  if (userLogin != null && userLogin.success) {
+                    navigator.pushReplacement(
+                      MaterialPageRoute(builder: (context) => RegisterPage()),
+                    );
+                  } else {
+                    messenger.showSnackBar(
+                      const SnackBar(
+                        content: Text('Login failed. Please try again.'),
+                      ),
+                    );
+                  }
+                },
                 buttonText: "Register here!",
                 fontSize: 14,
                 margin: const EdgeInsets.symmetric(horizontal: 10),

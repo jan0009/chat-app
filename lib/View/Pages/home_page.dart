@@ -12,31 +12,27 @@ import 'dart:convert';
 import 'package:logger/logger.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final String userId;
+  const HomePage({super.key, required this.userId});
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  String? userId;
+  late final String userId;
 
   @override
   void initState() {
     super.initState();
+    userId = widget.userId;
     fetchChatsFromServer();
-    _loadUserId();
   }
 
   final FlutterSecureStorage secureStorage = FlutterSecureStorage();
   final logger = Logger();
 
-  Future<void> _loadUserId() async {
-    String? storedUserId = await secureStorage.read(key: "userId");
-    setState(() {
-      userId = storedUserId;
-    });
-  }
+ 
 
   void goToLogin(BuildContext context) {
     Navigator.push(
@@ -83,50 +79,6 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  // Future<void> handleDeregister(BuildContext context) async {
-  //   // Store ScaffoldMessengerState before async operation
-  //   final messenger = ScaffoldMessenger.of(context);
-
-  //   // Get token from Secure Storage
-  //   String? token = await secureStorage.read(key: "auth_token");
-
-  //   if (token != null) {
-  //     try {
-  //       UserDeregister? userDeregister = await fetchApiDeregister(token);
-  //       if (userDeregister != null) {
-  //         messenger.showSnackBar(
-  //           SnackBar(
-  //             content: Text(userDeregister.message),
-  //             duration: Duration(seconds: 4),
-  //           ),
-  //         );
-  //         if (userDeregister.success == true) {
-  //           bool hasToken = await secureStorage.containsKey(key: "auth_token");
-  //           bool hasUserId = await secureStorage.containsKey(key: "userid");
-  //           bool hasPassword = await secureStorage.containsKey(key: "password");
-
-  //           if (hasToken) {
-  //             await secureStorage.delete(key: "auth_token");
-  //           }
-  //           if (hasUserId) {
-  //             await secureStorage.delete(key: "auth_token");
-  //           }
-  //           if (hasPassword) {
-  //             await secureStorage.delete(key: "auth_token");
-  //           }
-  //         }
-  //       }
-  //     } catch (error) {
-  //       messenger.showSnackBar(
-  //         SnackBar(
-  //           content: Text("Fehler beim Logout: $error"),
-  //           duration: Duration(seconds: 8),
-  //         ),
-  //       );
-  //     }
-  //   }
-  // }
-
   Future<UserLogout?> fetchApiLogout(String token) async {
     try {
       String apiUrl =
@@ -157,7 +109,7 @@ class _HomePageState extends State<HomePage> {
         MaterialPageRoute(
           builder:
               (context) =>
-                  ChatPage(chatId: chatId, chatName: chatName, userId: userId!),
+                  ChatPage(chatId: chatId, chatName: chatName, userId: userId),
         ),
       );
     } else {
@@ -170,7 +122,7 @@ class _HomePageState extends State<HomePage> {
   void goToAccountPage(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => AccountPage()),
+      MaterialPageRoute(builder: (context) => AccountPage(userId: userId)),
     );
   }
 
