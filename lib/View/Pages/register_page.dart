@@ -27,15 +27,8 @@ class RegisterPage extends StatelessWidget {
     );
   }
 
-  Future<bool> handleRegister(BuildContext context) async {
-    UserRegister? userRegister = await fetchApiRegister();
-
-    if (userRegister == null) {
-      logger.e('❌ Fehler: Login-API hat null zurückgegeben.');
-      return false; // Falls die API fehlschlägt, wird `false` zurückgegeben
-    }
-
-    return userRegister.success;
+  Future<UserRegister?> handleRegister(BuildContext context) async {
+    return await fetchApiRegister();
   }
 
   Future<UserRegister?> fetchApiRegister() async {
@@ -137,11 +130,16 @@ class RegisterPage extends StatelessWidget {
                   final navigator = Navigator.of(context);
                   final messenger = ScaffoldMessenger.of(context);
 
-                  bool loginSuccess = await handleRegister(context);
+                  UserRegister? userRegister = await handleRegister(context);
 
-                  if (loginSuccess) {
+                  if (userRegister != null && userRegister.success) {
+                    await Future.delayed(Duration(milliseconds: 200));
                     navigator.pushReplacement(
-                      MaterialPageRoute(builder: (context) => HomePage()),
+                      MaterialPageRoute(
+                        builder:
+                            (context) =>
+                                HomePage(userId: userNameController.text),
+                      ),
                     );
                   } else {
                     messenger.showSnackBar(

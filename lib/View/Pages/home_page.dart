@@ -12,31 +12,25 @@ import 'dart:convert';
 import 'package:logger/logger.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final String userId;
+  const HomePage({super.key, required this.userId});
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  String? userId;
+  late final String userId;
 
   @override
   void initState() {
     super.initState();
+    userId = widget.userId;
     fetchChatsFromServer();
-    _loadUserId();
   }
 
   final FlutterSecureStorage secureStorage = FlutterSecureStorage();
   final logger = Logger();
-
-  Future<void> _loadUserId() async {
-    String? storedUserId = await secureStorage.read(key: "userId");
-    setState(() {
-      userId = storedUserId;
-    });
-  }
 
   void goToLogin(BuildContext context) {
     Navigator.push(
@@ -83,50 +77,6 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  // Future<void> handleDeregister(BuildContext context) async {
-  //   // Store ScaffoldMessengerState before async operation
-  //   final messenger = ScaffoldMessenger.of(context);
-
-  //   // Get token from Secure Storage
-  //   String? token = await secureStorage.read(key: "auth_token");
-
-  //   if (token != null) {
-  //     try {
-  //       UserDeregister? userDeregister = await fetchApiDeregister(token);
-  //       if (userDeregister != null) {
-  //         messenger.showSnackBar(
-  //           SnackBar(
-  //             content: Text(userDeregister.message),
-  //             duration: Duration(seconds: 4),
-  //           ),
-  //         );
-  //         if (userDeregister.success == true) {
-  //           bool hasToken = await secureStorage.containsKey(key: "auth_token");
-  //           bool hasUserId = await secureStorage.containsKey(key: "userid");
-  //           bool hasPassword = await secureStorage.containsKey(key: "password");
-
-  //           if (hasToken) {
-  //             await secureStorage.delete(key: "auth_token");
-  //           }
-  //           if (hasUserId) {
-  //             await secureStorage.delete(key: "auth_token");
-  //           }
-  //           if (hasPassword) {
-  //             await secureStorage.delete(key: "auth_token");
-  //           }
-  //         }
-  //       }
-  //     } catch (error) {
-  //       messenger.showSnackBar(
-  //         SnackBar(
-  //           content: Text("Fehler beim Logout: $error"),
-  //           duration: Duration(seconds: 8),
-  //         ),
-  //       );
-  //     }
-  //   }
-  // }
-
   Future<UserLogout?> fetchApiLogout(String token) async {
     try {
       String apiUrl =
@@ -157,7 +107,7 @@ class _HomePageState extends State<HomePage> {
         MaterialPageRoute(
           builder:
               (context) =>
-                  ChatPage(chatId: chatId, chatName: chatName, userId: userId!),
+                  ChatPage(chatId: chatId, chatName: chatName, userId: userId),
         ),
       );
     } else {
@@ -170,7 +120,39 @@ class _HomePageState extends State<HomePage> {
   void goToAccountPage(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => AccountPage()),
+      MaterialPageRoute(builder: (context) => AccountPage(userId: userId)),
+    );
+  }
+
+  void goToCreateChatDialog(BuildContext context) {
+    final TextEditingController _chatNameController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text("Neuen Chat erstellen"),
+            content: TextField(
+              controller: _chatNameController,
+              decoration: const InputDecoration(hintText: "Chatname"),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text("Abbrechen"),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  final name = _chatNameController.text.trim();
+                  if (name.isNotEmpty) {
+                    await _createChat(name);
+                    Navigator.pop(context);
+                  }
+                },
+                child: const Text("Erstellen"),
+              ),
+            ],
+          ),
     );
   }
 
@@ -209,12 +191,8 @@ class _HomePageState extends State<HomePage> {
                   chat,
                 ) {
                   return {
-                    'chatid':
-                        chat['chatid'].toString(), // ✅ Typ in String umwandeln
+                    'chatid': chat['chatid'].toString(),
                     'chatname': chat['chatname'] ?? 'Unbekannter Chat',
-                    'role':
-                        chat['role'] ??
-                        'Unbekannte Rolle', // Optional hinzugefügt
                   };
                 }).toList();
           });
@@ -227,6 +205,56 @@ class _HomePageState extends State<HomePage> {
       }
     } catch (e) {
       logger.e("Fehler beim Abrufen der Chats: $e");
+    }
+  }
+
+  Future<void> _createChat(String chatName) async {
+    final token = await secureStorage.read(key: "auth_token");
+
+    if (token == null) {
+      logger.e("Kein Token gefunden.");
+      return;
+    }
+
+    try {
+      final uri = Uri.parse(
+        '${ApiConstants.baseUrl}createchat&token=$token&chatname=$chatName',
+      );
+
+      final response = await http.get(uri);
+
+      if (response.statusCode == 200) {
+        logger.i("✅ Chat erfolgreich erstellt.");
+        fetchChatsFromServer();
+      } else {
+        logger.e("❌ Fehler beim Erstellen des Chats: ${response.statusCode}");
+      }
+    } catch (e) {
+      logger.e("❌ Ausnahme bei createchat: $e");
+    }
+  }
+
+  Future<void> deleteChat(String chatId) async {
+    final token = await secureStorage.read(key: "auth_token");
+    if (token == null) {
+      logger.e("Kein Token gefunden");
+      return;
+    }
+
+    final uri = Uri.parse(
+      '${ApiConstants.baseUrl}deletechat&token=$token&chatid=$chatId',
+    );
+
+    try {
+      final response = await http.get(uri);
+      if (response.statusCode == 200) {
+        logger.i("Chat $chatId gelöscht");
+        await fetchChatsFromServer();
+      } else {
+        logger.e("Fehler beim Löschen: ${response.statusCode}");
+      }
+    } catch (e) {
+      logger.e("❌ Fehler beim Löschen des Chats: $e");
     }
   }
 
@@ -258,6 +286,11 @@ class _HomePageState extends State<HomePage> {
             icon: const Icon(Icons.account_circle, color: Colors.white),
             onPressed: () => goToAccountPage(context),
           ),
+          IconButton(
+            icon: const Icon(Icons.add, color: Colors.white),
+            tooltip: 'Neuen Chat erstellen',
+            onPressed: () => goToCreateChatDialog(context),
+          ),
         ],
 
         elevation: 4.0,
@@ -275,15 +308,66 @@ class _HomePageState extends State<HomePage> {
                 itemBuilder: (context, index) {
                   final chat = _chats[index];
 
-                  return MyButton(
-                    onTap:
-                        () =>
-                            goToChat(context, chat['chatid'], chat['chatname']),
-                    buttonText: chat['chatname'], // Dynamischer Chatname
-                    fontSize: 14,
-                    margin: const EdgeInsets.symmetric(horizontal: 10),
-                    padding: const EdgeInsets.all(10),
-                    backgroundColor: const Color(0xFF3A7CA5),
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 8.0, right: 8, left: 8),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: MyButton(
+                            onTap:
+                                () => goToChat(
+                                  context,
+                                  chat['chatid'],
+                                  chat['chatname'],
+                                ),
+                            buttonText:
+                                chat['chatname'], // Dynamischer Chatname
+                            fontSize: 14,
+                            margin: const EdgeInsets.symmetric(horizontal: 10),
+                            padding: const EdgeInsets.all(10),
+                            backgroundColor: const Color(0xFF3A7CA5),
+                          ),
+                        ),
+                        if (chat['chatid'] != "0")
+                          IconButton(
+                            icon: Icon(Icons.delete, color: Color(0xDD16425B)),
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: const Text("Chat löschen"),
+                                    content: const Text(
+                                      "Möchtest du diesen Chat wirklich löschen?",
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        child: const Text("Abbrechen"),
+                                        onPressed:
+                                            () => Navigator.of(context).pop(),
+                                      ),
+                                      TextButton(
+                                        child: const Text(
+                                          "Löschen",
+                                          style: TextStyle(color: Colors.red),
+                                        ),
+                                        onPressed: () {
+                                          Navigator.of(
+                                            context,
+                                          ).pop(); // Dialog schließen
+                                          deleteChat(
+                                            chat['chatid'],
+                                          ); // Chat löschen
+                                        },
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            },
+                          ),
+                      ],
+                    ),
                   );
                 },
               ),

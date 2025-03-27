@@ -16,43 +16,53 @@ class MyMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Zeit formatieren (z.B. "10:44 Uhr")
+    final isOwn = message.author.id == currentUserId;
     final time = DateFormat('HH:mm').format(
       DateTime.fromMillisecondsSinceEpoch(message.createdAt ?? 0),
     );
 
-    print("$senderName");
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          '$senderName Â· $time', // Absender & Uhrzeit
-          style: const TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-            color: Colors.grey,
-          ),
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+      alignment: isOwn ? Alignment.centerRight : Alignment.centerLeft,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+        constraints: const BoxConstraints(maxWidth: 250),
+        decoration: BoxDecoration(
+          color: isOwn ? const Color(0xFF3A7CA5) : Colors.white,
+          borderRadius: BorderRadius.circular(16),
         ),
-        const SizedBox(height: 4), 
-        Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: message.author.id == currentUserId
-                ? const Color(0xFF3A7CA5) // Eigene Nachricht
-                : Colors.white,           // Empfangene Nachricht
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Text(
-            message.text,
-            style: TextStyle(
-              color: message.author.id == currentUserId
-                  ? Colors.white
-                  : Colors.black,
+        child: Column(
+          crossAxisAlignment:
+              isOwn ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+          children: [
+            if (!isOwn) // Name nur anzeigen, wenn es nicht die eigene Nachricht ist
+              Text(
+                senderName,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                  color: Colors.black87,
+                ),
+              ),
+            if (!isOwn) const SizedBox(height: 4),
+            Text(
+              message.text,
+              style: TextStyle(
+                color: isOwn ? Colors.white : Colors.black,
+                fontSize: 14,
+              ),
             ),
-          ),
+            const SizedBox(height: 4),
+            Text(
+              time,
+              style: TextStyle(
+                color: isOwn ? Colors.white70 : Colors.grey,
+                fontSize: 10,
+              ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }

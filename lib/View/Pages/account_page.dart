@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:chatapp/view/pages/home_page.dart';
+import 'package:chatapp/View/Pages/home_page.dart';
 import 'package:chatapp/components/My_app_bar.dart';
 import 'package:chatapp/components/MyButton.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -10,21 +10,20 @@ import 'package:chatapp/View/Widgets/login.dart';
 import 'package:chatapp/View/Entities/user_deregister.dart';
 import 'package:chatapp/Shared/Constants/ApiConstants.dart';
 
-
 class AccountPage extends StatelessWidget {
-  AccountPage({super.key});
+  final String userId;
+  AccountPage({super.key, required this.userId});
 
   final FlutterSecureStorage secureStorage = FlutterSecureStorage();
   final logger = Logger();
 
-void goToHome(BuildContext context) {
+  void goToHome(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => HomePage(),
-      ),
+      MaterialPageRoute(builder: (context) => HomePage(userId: userId)),
     );
   }
+
   Future<void> handleDeregister(BuildContext context) async {
     // Store ScaffoldMessengerState before async operation
     final messenger = ScaffoldMessenger.of(context);
@@ -68,6 +67,7 @@ void goToHome(BuildContext context) {
       }
     }
   }
+
   Future<UserDeregister?> fetchApiDeregister(String token) async {
     try {
       String apiUrl =
@@ -94,36 +94,38 @@ void goToHome(BuildContext context) {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(title: "Account", onBackPressed: () => goToHome(context),),
+      appBar: CustomAppBar(
+        title: "Account",
+        onBackPressed: () => goToHome(context),
+      ),
 
       backgroundColor: const Color(0xFFb9d0e2),
-      
-    bottomNavigationBar: Padding(
-      padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 30.0),
-      child: Align(
-        alignment: Alignment.bottomCenter,
-        child: 
-          SizedBox(
+
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 30.0),
+        child: Align(
+          alignment: Alignment.bottomCenter,
+          child: SizedBox(
             width: 400,
             height: 50,
-            child: MyButton(onTap: () async {
-                          await handleDeregister(context);
-                          if (!context.mounted) return;
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(builder: (context) => LoginPage()),
-                          );
-                        },
-                        buttonText: "Deregister",
-                        fontSize: 14,
-                        margin: const EdgeInsets.symmetric(horizontal: 10),
-                        padding: const EdgeInsets.all(10),
-                        backgroundColor: Colors.red.shade400,
-                        ),
+            child: MyButton(
+              onTap: () async {
+                await handleDeregister(context);
+                if (!context.mounted) return;
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => LoginPage()),
+                );
+              },
+              buttonText: "Deregister",
+              fontSize: 14,
+              margin: const EdgeInsets.symmetric(horizontal: 10),
+              padding: const EdgeInsets.all(10),
+              backgroundColor: Colors.red.shade400,
+            ),
           ),
-        
+        ),
       ),
-    ),
     );
   }
 }
