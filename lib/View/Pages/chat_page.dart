@@ -10,7 +10,6 @@ import 'package:logger/logger.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-
 class ChatPage extends StatefulWidget {
   final String chatId;
   final String chatName;
@@ -45,6 +44,28 @@ class ChatPageState extends State<ChatPage> {
     );
   }
 
+  Future<String?> fetchPhoto(String photoId, String token) async {
+    try {
+      final uri = Uri.parse(
+        '${ApiConstants.baseUrl}getphoto&token=$token&photoid=$photoId',
+      );
+      final response = await http.get(uri);
+      
+
+      if (response.statusCode == 200) {
+        final bytes = response.bodyBytes;
+        final base64String = base64Encode(bytes);
+        return base64String;
+      } else {
+        logger.e("Fehler beim Abrufen des Bildes: ${response.statusCode}");
+        return null;
+      }
+    } catch (e) {
+      logger.e("❌ Fehler beim Laden des Bildes: $e");
+      return null;
+    }
+  }
+
   Future<void> fetchMessagesFromServer() async {
     const String apiUrl = '${ApiConstants.baseUrl}getmessages';
 
@@ -57,43 +78,67 @@ class ChatPageState extends State<ChatPage> {
     try {
       final uri = Uri.parse('$apiUrl&token=$token&chatid=${widget.chatId}');
       final response = await http.get(uri);
-
+      //logger.e("uri= $uri");
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
 
         if (responseData['messages'] != null) {
           final List<dynamic> messagesData = responseData['messages'];
 
+          final List<types.Message> loadedMessages = [];
+
+          for (final msg in messagesData.reversed) {
+            final senderId = msg['userid'].toString();
+            final isOwnMessage = senderId == widget.userId;
+            final photoId = msg['photoid'];
+            final text = msg['text'].toString();
+            final createdAt =
+                DateFormat(
+                  "yyyy-MM-dd_HH-mm-ss",
+                ).parse(msg['time']).millisecondsSinceEpoch;
+
+            final author = types.User(
+              id: senderId,
+              firstName: msg['usernick'] ?? 'Unbekannt',
+            );
+            //logger.e("token: $token + photoid= $photoId");
+            // Wenn ein Bild vorhanden ist, erst Bild laden
+            if (photoId != null && photoId.toString().isNotEmpty) {
+              final photoUrl = '${ApiConstants.baseUrl}getphoto&token=$token&photoid=$photoId';
+
+              
+                loadedMessages.add(
+                  types.ImageMessage(
+                    author: author,
+                    createdAt: createdAt,
+                    id: msg['id'].toString(),
+                    name: "Bild",
+                    size: 0, // du kannst auch die tatsächliche Größe angeben, falls verfügbar
+                    uri: photoUrl, 
+                    metadata: {
+                      'text': text, 
+                    },
+                  ),
+                );
+              
+            }
+
+            
+            if (text.isNotEmpty) {
+              loadedMessages.add(
+                types.TextMessage(
+                  author: author,
+                  createdAt: createdAt,
+                  id: msg['id'].toString() + '_text',
+                  text: text,
+                  metadata: {'senderName': senderId, 'isOwn': isOwnMessage},
+                ),
+              );
+            }
+          }
+
           setState(() {
-            _messages =
-                messagesData
-                    .map<types.Message>((msg) {
-                      final senderId = msg['userid'].toString();
-                      final isOwnMessage = senderId == widget.userId;
-                      
-                      
-                      return types.TextMessage(
-                        author: types.User(
-                          id: senderId,
-                          firstName:
-                              msg['usernick'] ??
-                              'Unbekannt',
-                        ),
-                        createdAt:
-                            DateFormat(
-                              "yyyy-MM-dd_HH-mm-ss",
-                            ).parse(msg['time']).millisecondsSinceEpoch,
-                        id: msg['id'].toString(),
-                        text: msg['text'].toString(),
-                        metadata: {
-                          'senderName': senderId,
-                          'isOwn': isOwnMessage,
-                        },
-                      );
-                    })
-                    .toList()
-                    .reversed
-                    .toList();
+            _messages = loadedMessages;
           });
         } else {
           logger.e("Keine Nachrichten im Chat gefunden.");
@@ -107,9 +152,7 @@ class ChatPageState extends State<ChatPage> {
   }
 
   Future<void> sendMessageToServer(String messageText) async {
-    
     const String apiUrl = '${ApiConstants.postUrl}';
-    
 
     String? token = await secureStorage.read(key: "auth_token");
     if (token == null) {

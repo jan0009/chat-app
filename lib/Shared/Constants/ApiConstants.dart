@@ -8,4 +8,5 @@ class ApiConstants {
   static const String getDeregister = "deregister";
   static const String getChats = "getchats";
   static const String postmessage = "postmessage";
+  static const String getPhoto = "getphoto";
 }

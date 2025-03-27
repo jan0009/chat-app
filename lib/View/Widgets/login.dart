@@ -58,6 +58,9 @@ class LoginPage extends StatelessWidget {
         UserLogin user = UserLogin.fromJson(jsonDecode(response.body));
         await secureStorage.write(key: "userId", value: user.userid);
         await secureStorage.write(key: "auth_token", value: user.token);
+
+        //logger.e("token: ${user.token} ");
+
         return user;
       } else {
         logger.d('API Fehler: ${response.statusCode} - $apiUrl');
