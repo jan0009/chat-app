@@ -182,7 +182,7 @@ class ChatPageState extends State<ChatPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomAppBar(
-        title: '${widget.chatName} ${widget.chatId}',
+        title: '${widget.chatName} ',//${widget.chatId}
         onBackPressed: () => goToHome(context),
       ),
 
