@@ -210,11 +210,11 @@ class _HomePageState extends State<HomePage> {
                 ) {
                   return {
                     'chatid':
-                        chat['chatid'].toString(), // ✅ Typ in String umwandeln
+                        chat['chatid'].toString(), 
                     'chatname': chat['chatname'] ?? 'Unbekannter Chat',
                     'role':
                         chat['role'] ??
-                        'Unbekannte Rolle', // Optional hinzugefügt
+                        'Unbekannte Rolle', 
                   };
                 }).toList();
           });

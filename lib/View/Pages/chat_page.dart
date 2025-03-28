@@ -1,3 +1,4 @@
+import 'package:chatapp/View/Entities/getchatmessages.dart';
 import 'package:chatapp/components/My_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
@@ -29,14 +30,19 @@ class ChatPage extends StatefulWidget {
 }
 
 class ChatPageState extends State<ChatPage> {
+  // List<types.Message> _messages = [];
+
+  late MessageResponse messageResponse;
+  bool _isLoaded = false;
   List<types.Message> _messages = [];
+
 
   final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
   final logger = Logger();
   @override
   void initState() {
     super.initState();
-    fetchMessagesFromServer(); // Holt die Nachrichten beim Seitenstart
+    _loadMessages(); // Holt die Nachrichten beim Seitenstart
   }
 
   void goToHome(BuildContext context) {
@@ -46,53 +52,79 @@ class ChatPageState extends State<ChatPage> {
     );
   }
 
-  Future<void> fetchMessagesFromServer() async {
-    const String apiUrl = '${ApiConstants.baseUrl}getmessages';
+  Future<MessageResponse> fetchMessagesFromServer() async {
+    // const String apiUrl = '${ApiConstants.baseUrl}getmessages';
 
     String? token = await secureStorage.read(key: "auth_token");
     if (token == null) {
       logger.e("Kein Token gefunden");
-      return;
+      return MessageResponse.empty();
     }
 
+    // try {
+    //   final uri = Uri.parse('$apiUrl&token=$token&chatid=${0}');
+    //   final response = await http.get(uri);
+
+    //   if (response.statusCode == 200) {
+    //     return MessageResponse.fromJson(jsonDecode(response.body));
+    //   } else {
+    //     logger.d('API Fehler: ${response.statusCode} - $apiUrl');
+    //     return null;
+    //   }
+    // } catch (e) {
+    //   logger.e('Fehler beim Abrufen der Nachrichten: $e');
+    // }
     try {
-      final uri = Uri.parse('$apiUrl&token=$token&chatid=${widget.chatId}');
+      String apiUrl =
+          '${ApiConstants.baseUrl}'
+          '${ApiConstants.getmessages}'
+          '&token=$token';
+
+      final uri = Uri.parse(apiUrl);
       final response = await http.get(uri);
 
       if (response.statusCode == 200) {
-        final Map<String, dynamic> responseData = jsonDecode(response.body);
-
-        if (responseData['messages'] != null) {
-          final List<dynamic> messagesData = responseData['messages'];
-
-        setState(() {
-          _messages = messagesData.map<types.TextMessage>((msg) {
-            final chatMessage = ChatMessages.fromJson(msg);
-
-            return types.TextMessage(
-              author: types.User(id: chatMessage.userid),
-              createdAt: DateFormat("yyyy-MM-dd_HH-mm-ss").parse(chatMessage.time).millisecondsSinceEpoch,
-              id: chatMessage.id.toString(),
-              text: chatMessage.text,
-              metadata: {
-                'senderName': chatMessage.usernick ?? 'Unbekannt'
-              },
-            );
-          }).toList();
-          });
-        } else {
-          logger.e("Keine Nachrichten im Chat gefunden.");
-        }
+        return MessageResponse.fromJson(jsonDecode(response.body));
       } else {
-        logger.e("Fehler beim Abrufen der Nachrichten: ${response.statusCode}");
+        logger.d('API Fehler: ${response.statusCode} - $apiUrl');
+        return MessageResponse.empty();
       }
-    } catch (e) {
-      logger.e("Fehler beim Abrufen der Nachrichten: $e");
+    } catch (e, stacktrace) {
+      logger.e('Fehler beim Abrufen der API: $e');
+      logger.e('Stacktrace: $stacktrace');
+      return MessageResponse.empty();
     }
+  }
+
+  void _loadMessages() async {
+    messageResponse = await fetchMessagesFromServer();
+    _messages =
+        messageResponse.messages.map((msg) {
+          return types.TextMessage(
+            id: msg.id.toString(),
+            author: types.User(id: msg.userid),
+            text: msg.text,
+            createdAt:
+                DateFormat(
+                  "yyyy-MM-dd_HH-mm-ss",
+                ).parse(msg.time).millisecondsSinceEpoch,
+            metadata: {'senderName': msg.usernick},
+          );
+        }).toList();
+
+    setState(() {
+      _isLoaded = true;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    if (!(_isLoaded)) {
+      return const Scaffold(
+        backgroundColor: Color(0xFFb9d0e2),
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
     return Scaffold(
       appBar: CustomAppBar(
         title: '${widget.chatName} ${widget.chatId}',
@@ -100,13 +132,14 @@ class ChatPageState extends State<ChatPage> {
       ),
 
       backgroundColor: const Color(0xFFb9d0e2),
-
       body: Chat(
         messages: _messages,
         onSendPressed: _handleSendPressed,
         user: types.User(id: widget.userId),
         customMessageBuilder: (message, {required int messageWidth}) {
-            final senderName = (message as types.TextMessage).metadata?['senderName'] ?? 'Unbekannt';
+          final senderName =
+              (message as types.TextMessage).metadata?['senderName'] ??
+              'Unbekannt';
 
           return MyMessage(
             message: message as types.TextMessage,
@@ -133,15 +166,12 @@ class ChatPageState extends State<ChatPage> {
       createdAt: DateTime.now().millisecondsSinceEpoch,
       id: 'some-unique-id',
       text: message.text,
-    
-    metadata: {
-        'senderName': 'Du' 
-      }
-      );
+
+      metadata: {'senderName': 'Du'},
+    );
 
     setState(() {
       _messages.insert(0, textMessage);
     });
   }
 }
-

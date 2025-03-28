@@ -2,7 +2,7 @@ class ChatMessages {
   final int id;
   final String userid;
   final String time;
-  final String chatid;
+  final int chatid;
   final String text;
   final String usernick;
   final String userhash;
