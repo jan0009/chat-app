@@ -1,6 +1,5 @@
 import 'package:chatapp/Shared/Constants/ApiConstants.dart';
 import 'package:chatapp/View/Entities/user_register.dart';
-import 'package:chatapp/View/Entities/user_validateToken.dart';
 import 'package:chatapp/View/Pages/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:chatapp/components/MyButton.dart';
@@ -66,45 +65,6 @@ class RegisterPage extends StatelessWidget {
       return null;
     }
   }
-
-  // Future<String?> getToken() async {
-  //   final token = await secureStorage.read(key: "auth_token");
-  //   if (token == null) {
-  //     logger.e("Kein Token gefunden (Token null)");
-  //     return null;
-  //   }
-  //   return token;
-  // }
-
-  // Future<bool> validateToken() async {
-  //   final token = await getToken();
-  //   if (token == null) {
-  //     return false;
-  //   }
-  //   try {
-  //     String apiUrl =
-  //         '${ApiConstants.baseUrl}'
-  //         '${ApiConstants.validateToken}'
-  //         '&token=$token';
-
-  //     final uri = Uri.parse(apiUrl);
-  //     final response = await http.get(uri);
-
-  //     if (response.statusCode == 200) {
-  //       ValidateToken validateToken = ValidateToken.fromJson(
-  //         jsonDecode(response.body),
-  //       );
-  //       return validateToken.success;
-  //     } else {
-  //       logger.d('API Fehler: ${response.statusCode} - $apiUrl');
-  //       return false;
-  //     }
-  //   } catch (e, stacktrace) {
-  //     logger.e('🚨 Fehler beim Abrufen der API: $e');
-  //     logger.e('📜 Stacktrace: $stacktrace');
-  //     return false;
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {
