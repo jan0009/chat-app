@@ -16,14 +16,17 @@ class AuthCheckPage extends StatefulWidget {
 }
 
 class _AuthCheckPageState extends State<AuthCheckPage> {
+  final FlutterSecureStorage secureStorage = FlutterSecureStorage();
+  final logger = Logger();
+
+  bool isLoading = true; 
+
   @override
   void initState() {
     super.initState();
     _checkAuth();
   }
 
-  final FlutterSecureStorage secureStorage = FlutterSecureStorage();
-  final logger = Logger();
 
   Future<String?> getToken() async {
     final token = await secureStorage.read(key: "auth_token");
@@ -82,11 +85,22 @@ class _AuthCheckPageState extends State<AuthCheckPage> {
         context,
         MaterialPageRoute(builder: (context) => HomePage(userId: userId)),
       );
-    } else {}
+    } 
+    else {
+        setState(() {
+          isLoading = false;
+        });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return LoginPage();
+    return isLoading
+        ? const Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(),
+            ),
+          )
+        : LoginPage();
   }
 }
