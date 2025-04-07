@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:chatapp/components/My_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
@@ -28,13 +30,26 @@ class ChatPage extends StatefulWidget {
 
 class ChatPageState extends State<ChatPage> {
   List<types.Message> _messages = [];
+  Timer? _refreshTimer;
 
   final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
   final logger = Logger();
+
   @override
   void initState() {
     super.initState();
     fetchMessagesFromServer(); // Holt die Nachrichten beim Seitenstart
+
+     _refreshTimer = Timer.periodic(
+    const Duration(seconds: 3),
+    (_) => fetchMessagesFromServer(),
+    );
+  }
+
+  @override
+  void dispose() {
+    _refreshTimer?.cancel();
+    super.dispose();
   }
 
   void goToHome(BuildContext context) {
