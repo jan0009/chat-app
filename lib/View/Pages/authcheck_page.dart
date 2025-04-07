@@ -39,7 +39,7 @@ class _AuthCheckPageState extends State<AuthCheckPage> {
 
   Future<String?> getUserId() async {
     final userid = await secureStorage.read(key: "userid");
-    if (userid == null) {
+    if (userid == null || userid.isEmpty) {
       logger.e("Kein userid gefunden (userid null)");
       return null;
     }
