@@ -58,8 +58,17 @@ class _HomePageState extends State<HomePage> {
           );
           if (userLogout.success == true) {
             bool hasToken = await secureStorage.containsKey(key: "auth_token");
+            bool hasUserId = await secureStorage.containsKey(key: "userid");
+            bool hasPassword = await secureStorage.containsKey(key: "password");
+            
             if (hasToken) {
               await secureStorage.delete(key: "auth_token");
+            }
+            if(hasUserId){
+              await secureStorage.delete(key: "userid");
+            }
+            if(hasPassword){
+              await secureStorage.delete(key: "password");
             }
           }
         }
