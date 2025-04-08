@@ -42,7 +42,7 @@ class ChatPageState extends State<ChatPage> {
     fetchMessagesFromServer(); // Holt die Nachrichten beim Seitenstart
 
      _refreshTimer = Timer.periodic(
-    const Duration(seconds: 10),
+    const Duration(seconds: 3),
     (_) => fetchMessagesFromServer(),
     );
   }
