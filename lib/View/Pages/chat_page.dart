@@ -157,7 +157,7 @@ class ChatPageState extends State<ChatPage> {
           'request': "postmessage",
           'token': token,
           'text': messageText,
-          'chatid': "0",
+          'chatid': widget.chatId,
         }),
       );
 
@@ -292,7 +292,7 @@ class ChatPageState extends State<ChatPage> {
   void _handleImageSelection(BuildContext context) async {
      Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => CameraPage()),
+      MaterialPageRoute(builder: (context) => CameraPage(chatId: widget.chatId)),
     );
   }
 }
