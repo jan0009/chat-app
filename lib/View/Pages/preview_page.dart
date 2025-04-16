@@ -8,8 +8,14 @@ import 'package:logger/logger.dart';
 
 class PreviewPage extends StatefulWidget {
   final Uint8List imageBytes;
+  final String chatId;
 
-  const PreviewPage({super.key, required this.imageBytes});
+
+  const PreviewPage({
+    super.key,
+     required this.imageBytes,
+     required this.chatId
+  });
 
   @override
   State<PreviewPage> createState() => _PreviewPageState();
@@ -50,7 +56,7 @@ Future<void> sendMessageToServerWithImage(String messageText, Uint8List imageByt
         'token': token,
         'text': messageText,
         'photo': base64Image,
-        'chatid': "0",
+        'chatid': widget.chatId,
       }),
     );
 

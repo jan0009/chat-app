@@ -4,7 +4,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class CameraPage extends StatefulWidget {
-  const CameraPage({super.key});
+
+  final String chatId;
+
+  const CameraPage({
+    super.key,
+    required this.chatId,
+    });
+
 
   @override
   State<CameraPage> createState() => _CameraPageState();
@@ -34,39 +41,37 @@ class _CameraPageState extends State<CameraPage> {
     if (!_isInitialized) {
       return const Center(child: CircularProgressIndicator());
     }
-        return Scaffold(
-            body: Stack(
-              children: [
-                // 📸 Kamera-Vorschau über den ganzen Screen
-                Positioned.fill(
-                child: CameraPreview(_controller),
-                ),
-                // 🔘 Zurück-Button oben links
-                Positioned(
-                    top: 40,
-                    left: 20,
-                    child: FloatingActionButton.small(
-                        heroTag: "close_btn",
-                        onPressed: () => Navigator.pop(context),
-                        child: const Icon(Icons.close),
-                    ),
-                ),
-                // 📷 Foto aufnehmen Button unten mittig
-                Positioned(
-                    bottom: 40,
-                    left: 0,
-                    right: 0,
-                    child: Center(
-                        child: FloatingActionButton(
-                        heroTag: "capture_btn",
-                        onPressed: _takePicture,
-                        child: const Icon(CupertinoIcons.camera),
-                        ),
-                    ),
-                ),
-              ],
+    return Scaffold(
+      body: Stack(
+        children: [
+          // 📸 Kamera-Vorschau über den ganzen Screen
+          Positioned.fill(child: CameraPreview(_controller)),
+          // 🔘 Zurück-Button oben links
+          Positioned(
+            top: 40,
+            left: 20,
+            child: FloatingActionButton.small(
+              heroTag: "close_btn",
+              onPressed: () => Navigator.pop(context),
+              child: const Icon(Icons.close),
             ),
-        );
+          ),
+          // 📷 Foto aufnehmen Button unten mittig
+          Positioned(
+            bottom: 40,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: FloatingActionButton(
+                heroTag: "capture_btn",
+                onPressed: _takePicture,
+                child: const Icon(CupertinoIcons.camera),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -75,19 +80,17 @@ class _CameraPageState extends State<CameraPage> {
     super.dispose();
   }
 
-Future<void> _takePicture() async {
+  Future<void> _takePicture() async {
     try {
-        final XFile file = await _controller.takePicture();
-        final bytes = await file.readAsBytes();
+      final XFile file = await _controller.takePicture();
+      final bytes = await file.readAsBytes();
 
-        Navigator.push(
+      Navigator.push(
         context,
-        MaterialPageRoute(
-            builder: (context) => PreviewPage(imageBytes: bytes),
-        ),
-        );
+        MaterialPageRoute(builder: (context) => PreviewPage(imageBytes: bytes, chatId: widget.chatId)),
+      );
     } catch (e) {
-        print('Fehler beim Aufnehmen: $e');
+      print('Fehler beim Aufnehmen: $e');
     }
   }
 }
