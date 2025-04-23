@@ -237,6 +237,7 @@ class ChatPageState extends State<ChatPage> {
       floatingActionButton: FloatingActionButton(
     tooltip: 'Benutzer einladen',
     backgroundColor: const Color(0xFF3A7CA5),
+    foregroundColor: Colors.white,
     onPressed: _goToInvite,
     child: const Icon(Icons.person_add),
     

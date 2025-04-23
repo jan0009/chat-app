@@ -376,6 +376,7 @@ class _HomePageState extends State<HomePage> {
     heroTag: 'inboxFab',
     tooltip: 'Einladungen',
     backgroundColor: const Color(0xFF3A7CA5),
+    foregroundColor: Colors.white,
     onPressed: _openInviteInbox,
     child: const Icon(Icons.mail_outline),
   ),
