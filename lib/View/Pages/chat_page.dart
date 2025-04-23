@@ -9,6 +9,7 @@ import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../../View/Pages/invite_page.dart';
 
 class ChatPage extends StatefulWidget {
   final String chatId;
@@ -31,10 +32,15 @@ class ChatPageState extends State<ChatPage> {
 
   final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
   final logger = Logger();
+
+   String? _token;                       //  ←  hier speichern wir später den Token
+  bool _isLoadingToken = true;
+
   @override
   void initState() {
     super.initState();
     fetchMessagesFromServer(); // Holt die Nachrichten beim Seitenstart
+    _loadToken();
   }
 
   void goToHome(BuildContext context) {
@@ -43,6 +49,29 @@ class ChatPageState extends State<ChatPage> {
       MaterialPageRoute(builder: (context) => HomePage(userId: widget.userId)),
     );
   }
+  Future<void> _loadToken() async {
+    final t = await secureStorage.read(key: "auth_token");
+    setState(() {
+      _token = t;
+      _isLoadingToken = false;
+    });
+  }
+  Future<void> _goToInvite() async {
+  // Falls der Token noch lädt oder nicht vorhanden ist, abbrechen
+  if (_isLoadingToken || _token == null) return;
+
+  if (!mounted) return;        // Safety-check
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (_) => InvitePage(
+        token: _token!,        // bereits aus SecureStorage geladen
+        chatId: widget.chatId,
+        userId: widget.userId,
+      ),
+    ),
+  );
+}
 
   Future<void> fetchMessagesFromServer() async {
     const String apiUrl = '${ApiConstants.baseUrl}getmessages';
@@ -180,6 +209,7 @@ class ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
+    
     return Scaffold(
       appBar: CustomAppBar(
         title: '${widget.chatName} ',//${widget.chatId}
@@ -204,6 +234,13 @@ class ChatPageState extends State<ChatPage> {
           sentMessageBodyTextStyle: const TextStyle(color: Colors.white),
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+    tooltip: 'Benutzer einladen',
+    backgroundColor: const Color(0xFF3A7CA5),
+    onPressed: _goToInvite,
+    child: const Icon(Icons.person_add),
+    
+  ),
     );
   }
 

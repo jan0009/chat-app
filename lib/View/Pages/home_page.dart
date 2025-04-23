@@ -10,6 +10,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:logger/logger.dart';
+import 'package:chatapp/View/Pages/inbox_page.dart';
 
 class HomePage extends StatefulWidget {
   final String userId;
@@ -371,6 +372,31 @@ class _HomePageState extends State<HomePage> {
                   );
                 },
               ),
+              floatingActionButton: FloatingActionButton(
+    heroTag: 'inboxFab',
+    tooltip: 'Einladungen',
+    backgroundColor: const Color(0xFF3A7CA5),
+    onPressed: _openInviteInbox,
+    child: const Icon(Icons.mail_outline),
+  ),
     );
   }
+  Future<void> _openInviteInbox() async {
+  final token = await secureStorage.read(key: 'auth_token');
+  if (token == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Kein Token gefunden.')),
+    );
+    return;
+  }
+
+  if (!mounted) return;
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (_) => InboxPage(token: token, userId: userId),
+    ),
+  );
 }
+}
+
