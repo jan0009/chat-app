@@ -54,8 +54,6 @@ class RegisterPage extends StatelessWidget {
           jsonDecode(response.body),
         );
         await secureStorage.write(key: "auth_token", value: userRegister.token);
-        await secureStorage.write(key: "userid", value: userid);
-        await secureStorage.write(key: "password", value: password);
         return userRegister;
       } else {
         logger.d('API Fehler: ${response.statusCode} - $apiUrl');

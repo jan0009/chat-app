@@ -50,10 +50,10 @@ class AccountPage extends StatelessWidget {
               await secureStorage.delete(key: "auth_token");
             }
             if (hasUserId) {
-              await secureStorage.delete(key: "auth_token");
+              await secureStorage.delete(key: "userid");
             }
             if (hasPassword) {
-              await secureStorage.delete(key: "auth_token");
+              await secureStorage.delete(key: "password");
             }
           }
         }

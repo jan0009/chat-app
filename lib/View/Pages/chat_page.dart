@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:chatapp/View/Pages/camera_page.dart';
 import 'package:chatapp/components/My_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
@@ -29,18 +32,30 @@ class ChatPage extends StatefulWidget {
 
 class ChatPageState extends State<ChatPage> {
   List<types.Message> _messages = [];
+  Timer? _refreshTimer;
 
   final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
   final logger = Logger();
 
-   String? _token;                       //  ←  hier speichern wir später den Token
+  String? _token; 
   bool _isLoadingToken = true;
 
   @override
   void initState() {
     super.initState();
-    fetchMessagesFromServer(); // Holt die Nachrichten beim Seitenstart
-    _loadToken();
+    fetchMessagesFromServer(); 
+    _loadToken(); // Lädt den Token
+
+    _refreshTimer = Timer.periodic(
+      const Duration(seconds: 3),
+      (_) => fetchMessagesFromServer(),
+    );
+  }
+
+  @override
+  void dispose() {
+    _refreshTimer?.cancel();
+    super.dispose();
   }
 
   void goToHome(BuildContext context) {
@@ -170,7 +185,7 @@ class ChatPageState extends State<ChatPage> {
           'request': "postmessage",
           'token': token,
           'text': messageText,
-          'chatid': "0",
+          'chatid': widget.chatId,
         }),
       );
 
@@ -220,6 +235,7 @@ class ChatPageState extends State<ChatPage> {
 
       body: Chat(
         messages: _messages,
+        onAttachmentPressed: _handleAttachmentPressed,
         onSendPressed: _handleSendPressed,
         user: types.User(id: widget.userId),
         showUserNames: true,
@@ -235,17 +251,87 @@ class ChatPageState extends State<ChatPage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-    tooltip: 'Benutzer einladen',
-    backgroundColor: const Color(0xFF3A7CA5),
-    foregroundColor: Colors.white,
-    onPressed: _goToInvite,
-    child: const Icon(Icons.person_add),
+      tooltip: 'Benutzer einladen',
+      backgroundColor: const Color(0xFF3A7CA5),
+      foregroundColor: Colors.white,
+      onPressed: _goToInvite,
+      child: const Icon(Icons.person_add),
     
   ),
+
+    
+
     );
   }
 
   void _handleSendPressed(types.PartialText message) {
     sendMessageToServer(message.text);
+  }
+
+    void _handleAttachmentPressed() {
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (BuildContext context) => SafeArea(
+        child: SizedBox(
+          height: 200,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              const SizedBox(height: 12), 
+
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  _handleImageSelection(context);
+                },
+                child: const Align(
+                  alignment: AlignmentDirectional.center,
+                  child: Text(
+                    'Photo',
+                    style: TextStyle(fontSize: 18),),
+                ),
+              ),
+              const SizedBox(height: 8), // Abstand
+
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  _handleFileSelection();
+                },
+                child: const Align(
+                  alignment: AlignmentDirectional.center,
+                  child: Text(
+                    'File',
+                    style: TextStyle(fontSize: 18),),
+                ),
+              ),
+              const SizedBox(height: 8), 
+
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Align(
+                  alignment: AlignmentDirectional.center,
+                  child: Text(
+                    'Cancel',
+                    style: TextStyle(fontSize: 18, color: Colors.redAccent)
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _handleFileSelection() async {
+   
+  }
+
+  void _handleImageSelection(BuildContext context) async {
+     Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => CameraPage(chatId: widget.chatId)),
+    );
   }
 }

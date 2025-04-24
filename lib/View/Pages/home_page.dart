@@ -1,4 +1,4 @@
-//stless
+import 'dart:async';
 import 'package:chatapp/Shared/Constants/ApiConstants.dart';
 import 'package:chatapp/View/Entities/user_logout.dart';
 import 'package:chatapp/View/Pages/account_page.dart';
@@ -22,16 +22,30 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   late final String userId;
+  List<Map<String, dynamic>> _chats = [];
+  Timer? _refreshTimer;
+
+
+  final FlutterSecureStorage secureStorage = FlutterSecureStorage();
+  final logger = Logger();
 
   @override
   void initState() {
     super.initState();
     userId = widget.userId;
     fetchChatsFromServer();
+
+    _refreshTimer = Timer.periodic(
+    const Duration(seconds: 5),
+    (_) => fetchChatsFromServer(),
+    );
   }
 
-  final FlutterSecureStorage secureStorage = FlutterSecureStorage();
-  final logger = Logger();
+  @override
+  void dispose() {
+    _refreshTimer?.cancel();
+    super.dispose();
+  }
 
   void goToLogin(BuildContext context) {
     Navigator.push(
@@ -59,8 +73,17 @@ class _HomePageState extends State<HomePage> {
           );
           if (userLogout.success == true) {
             bool hasToken = await secureStorage.containsKey(key: "auth_token");
+            bool hasUserId = await secureStorage.containsKey(key: "userid");
+            bool hasPassword = await secureStorage.containsKey(key: "password");
+            
             if (hasToken) {
               await secureStorage.delete(key: "auth_token");
+            }
+            if(hasUserId){
+              await secureStorage.delete(key: "userid");
+            }
+            if(hasPassword){
+              await secureStorage.delete(key: "password");
             }
           }
         }
@@ -165,7 +188,7 @@ class _HomePageState extends State<HomePage> {
     return token;
   }
 
-  List<Map<String, dynamic>> _chats = [];
+  // List<Map<String, dynamic>> _chats = [];
 
   Future<void> fetchChatsFromServer() async {
     const String apiUrl = '${ApiConstants.baseUrl}${ApiConstants.getChats}';
