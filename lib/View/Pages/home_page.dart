@@ -10,6 +10,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:logger/logger.dart';
+import 'package:chatapp/View/Pages/inbox_page.dart';
 
 class HomePage extends StatefulWidget {
   final String userId;
@@ -309,11 +310,11 @@ class _HomePageState extends State<HomePage> {
             icon: const Icon(Icons.account_circle, color: Colors.white),
             onPressed: () => goToAccountPage(context),
           ),
-          IconButton(
-            icon: const Icon(Icons.add, color: Colors.white),
-            tooltip: 'Neuen Chat erstellen',
-            onPressed: () => goToCreateChatDialog(context),
-          ),
+          // IconButton(
+          //   icon: const Icon(Icons.add, color: Colors.white),
+          //   tooltip: 'Neuen Chat erstellen',
+          //   onPressed: () => goToCreateChatDialog(context),
+          // ),
         ],
 
         elevation: 4.0,
@@ -394,6 +395,62 @@ class _HomePageState extends State<HomePage> {
                   );
                 },
               ),
+      floatingActionButton: FloatingActionButton(
+        tooltip: 'Aktionen',
+        backgroundColor: const Color(0xFF3A7CA5),
+        foregroundColor: Colors.white,
+        child: const Icon(Icons.more_vert, color: Colors.white),
+        onPressed: () => _showFabMenu(context), // ← Menü öffnen
+      ),
+    );
+  }
+
+  Future<void> _openInviteInbox() async {
+    final token = await secureStorage.read(key: 'auth_token');
+    if (token == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Kein Token gefunden.')));
+      return;
+    }
+
+    if (!mounted) return;
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => InboxPage(token: token, userId: userId),
+      ),
+    );
+  }
+
+  void _showFabMenu(BuildContext ctx) {
+    showModalBottomSheet(
+      context: ctx,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder:
+          (_) => Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.mail_outline),
+                title: const Text('Einladungen'),
+                onTap: () {
+                  Navigator.pop(ctx); // Bottom-Sheet schließen
+                  _openInviteInbox(); // vorhandene Funktion
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.add),
+                title: const Text('Neuen Chat erstellen'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  goToCreateChatDialog(ctx); // vorhandene Funktion
+                },
+              ),
+            ],
+          ),
     );
   }
 }
