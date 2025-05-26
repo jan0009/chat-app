@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:chatapp/View/Pages/camera_page.dart';
-import 'package:chatapp/components/My_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:chatapp/View/Pages/home_page.dart';
@@ -226,12 +225,23 @@ class ChatPageState extends State<ChatPage> {
   Widget build(BuildContext context) {
     
     return Scaffold(
-      appBar: CustomAppBar(
-        title: '${widget.chatName} ',//${widget.chatId}
-        onBackPressed: () => goToHome(context),
+      appBar: AppBar(
+        title: Text(widget.chatName),
+        backgroundColor: const Color(0xFF3A7CA5),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () => goToHome(context),
+        ),
+        actions: [
+          IconButton(
+            tooltip: 'Benutzer einladen',
+            icon: Icon(Icons.person_add),
+            onPressed: _goToInvite,
+          ),
+        ],
       ),
 
-      backgroundColor: const Color(0xFFb9d0e2),
+      backgroundColor: const Color.fromARGB(255, 16, 24, 30),
 
       body: Chat(
         messages: _messages,
@@ -250,16 +260,13 @@ class ChatPageState extends State<ChatPage> {
           sentMessageBodyTextStyle: const TextStyle(color: Colors.white),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-      tooltip: 'Benutzer einladen',
-      backgroundColor: const Color(0xFF3A7CA5),
-      foregroundColor: Colors.white,
-      onPressed: _goToInvite,
-      child: const Icon(Icons.person_add),
-    
-  ),
-
-    
+      // floatingActionButton: FloatingActionButton(
+      // tooltip: 'Benutzer einladen',
+      // backgroundColor: const Color(0xFF3A7CA5),
+      // foregroundColor: Colors.white,
+      // onPressed: _goToInvite,
+      // child: const Icon(Icons.person_add),
+      // ),
 
     );
   }
