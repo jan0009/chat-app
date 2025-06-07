@@ -151,22 +151,22 @@ class LoginPage extends StatelessWidget {
               MyButton(
                 onTap: () async {
                   final navigator = Navigator.of(context);
-                  final messenger = ScaffoldMessenger.of(context);
+                  // final messenger = ScaffoldMessenger.of(context);
 
                   //bool loginSuccess = await handleLogin(context);
-                  UserLogin? userLogin = await handleLogin(context);
+                  // UserLogin? userLogin = await handleLogin(context);
 
-                  if (userLogin != null && userLogin.success) {
+                  // if (userLogin != null && userLogin.success) {
                     navigator.pushReplacement(
                       MaterialPageRoute(builder: (context) => RegisterPage()),
                     );
-                  } else {
-                    messenger.showSnackBar(
-                      const SnackBar(
-                        content: Text('Login failed. Please try again.'),
-                      ),
-                    );
-                  }
+                //   } else {
+                //     messenger.showSnackBar(
+                //       const SnackBar(
+                //         content: Text('Login failed. Please try again.'),
+                //       ),
+                //     );
+                //   }
                 },
                 buttonText: "Register here!",
                 fontSize: 14,
