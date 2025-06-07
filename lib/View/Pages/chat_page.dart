@@ -36,13 +36,13 @@ class ChatPageState extends State<ChatPage> {
   final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
   final logger = Logger();
 
-  String? _token; 
+  String? _token;
   bool _isLoadingToken = true;
 
   @override
   void initState() {
     super.initState();
-    fetchMessagesFromServer(); 
+    fetchMessagesFromServer();
     _loadToken(); // Lädt den Token
 
     _refreshTimer = Timer.periodic(
@@ -63,6 +63,7 @@ class ChatPageState extends State<ChatPage> {
       MaterialPageRoute(builder: (context) => HomePage(userId: widget.userId)),
     );
   }
+
   Future<void> _loadToken() async {
     final t = await secureStorage.read(key: "auth_token");
     setState(() {
@@ -70,22 +71,24 @@ class ChatPageState extends State<ChatPage> {
       _isLoadingToken = false;
     });
   }
-  Future<void> _goToInvite() async {
-  // Falls der Token noch lädt oder nicht vorhanden ist, abbrechen
-  if (_isLoadingToken || _token == null) return;
 
-  if (!mounted) return;        // Safety-check
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (_) => InvitePage(
-        token: _token!,        // bereits aus SecureStorage geladen
-        chatId: widget.chatId,
-        userId: widget.userId,
+  Future<void> _goToInvite() async {
+    // Falls der Token noch lädt oder nicht vorhanden ist, abbrechen
+    if (_isLoadingToken || _token == null) return;
+
+    if (!mounted) return; // Safety-check
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder:
+            (_) => InvitePage(
+              token: _token!, // bereits aus SecureStorage geladen
+              chatId: widget.chatId,
+              userId: widget.userId,
+            ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   Future<void> fetchMessagesFromServer() async {
     const String apiUrl = '${ApiConstants.baseUrl}getmessages';
@@ -223,7 +226,6 @@ class ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
-    
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.chatName),
@@ -258,8 +260,14 @@ class ChatPageState extends State<ChatPage> {
             color: Color(0xFF16425B),
           ),
           sentMessageBodyTextStyle: const TextStyle(color: Colors.white),
+          attachmentButtonIcon: Icon(
+            Icons.photo_camera_rounded, 
+            color: Colors.white,
+            size: 32,           
+          ),
         ),
       ),
+
       // floatingActionButton: FloatingActionButton(
       // tooltip: 'Benutzer einladen',
       // backgroundColor: const Color(0xFF3A7CA5),
@@ -267,7 +275,6 @@ class ChatPageState extends State<ChatPage> {
       // onPressed: _goToInvite,
       // child: const Icon(Icons.person_add),
       // ),
-
     );
   }
 
@@ -275,70 +282,67 @@ class ChatPageState extends State<ChatPage> {
     sendMessageToServer(message.text);
   }
 
-    void _handleAttachmentPressed() {
+  void _handleAttachmentPressed() {
     showModalBottomSheet<void>(
       context: context,
-      builder: (BuildContext context) => SafeArea(
-        child: SizedBox(
-          height: 200,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              const SizedBox(height: 12), 
+      builder:
+          (BuildContext context) => SafeArea(
+            child: SizedBox(
+              height: 200,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  const SizedBox(height: 12),
 
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  _handleImageSelection(context);
-                },
-                child: const Align(
-                  alignment: AlignmentDirectional.center,
-                  child: Text(
-                    'Photo',
-                    style: TextStyle(fontSize: 18),),
-                ),
-              ),
-              const SizedBox(height: 8), // Abstand
-
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  _handleFileSelection();
-                },
-                child: const Align(
-                  alignment: AlignmentDirectional.center,
-                  child: Text(
-                    'File',
-                    style: TextStyle(fontSize: 18),),
-                ),
-              ),
-              const SizedBox(height: 8), 
-
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Align(
-                  alignment: AlignmentDirectional.center,
-                  child: Text(
-                    'Cancel',
-                    style: TextStyle(fontSize: 18, color: Colors.redAccent)
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      _handleImageSelection(context);
+                    },
+                    child: const Align(
+                      alignment: AlignmentDirectional.center,
+                      child: Text('Photo', style: TextStyle(fontSize: 18)),
+                    ),
                   ),
-                ),
+                  const SizedBox(height: 8), // Abstand
+
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      _handleFileSelection();
+                    },
+                    child: const Align(
+                      alignment: AlignmentDirectional.center,
+                      child: Text('File', style: TextStyle(fontSize: 18)),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Align(
+                      alignment: AlignmentDirectional.center,
+                      child: Text(
+                        'Cancel',
+                        style: TextStyle(fontSize: 18, color: Colors.redAccent),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
-      ),
     );
   }
 
-  void _handleFileSelection() async {
-   
-  }
+  void _handleFileSelection() async {}
 
   void _handleImageSelection(BuildContext context) async {
-     Navigator.push(
+    Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => CameraPage(chatId: widget.chatId)),
+      MaterialPageRoute(
+        builder: (context) => CameraPage(chatId: widget.chatId),
+      ),
     );
   }
 }
