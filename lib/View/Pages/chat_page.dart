@@ -1,6 +1,8 @@
 import 'dart:async';
 
+import 'package:chatapp/Shared/Constants/theme.dart';
 import 'package:chatapp/View/Pages/camera_page.dart';
+import 'package:chatapp/View/Pages/settings_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:chatapp/View/Pages/home_page.dart';
@@ -58,10 +60,12 @@ class ChatPageState extends State<ChatPage> {
   }
 
   void goToHome(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => HomePage(userId: widget.userId)),
-    );
+    Navigator.pop(context);
+
+    // Navigator.push(
+    //   context,
+    //   MaterialPageRoute(builder: (context) => HomePage(userId: widget.userId)),
+    // );
   }
 
   Future<void> _loadToken() async {
@@ -72,7 +76,25 @@ class ChatPageState extends State<ChatPage> {
     });
   }
 
-  Future<void> _goToInvite() async {
+  // Future<void> _goToInvite() async {
+  //   // Falls der Token noch lädt oder nicht vorhanden ist, abbrechen
+  //   if (_isLoadingToken || _token == null) return;
+
+  //   if (!mounted) return; // Safety-check
+  //   Navigator.push(
+  //     context,
+  //     MaterialPageRoute(
+  //       builder:
+  //           (_) => InvitePage(
+  //             token: _token!, // bereits aus SecureStorage geladen
+  //             chatId: widget.chatId,
+  //             userId: widget.userId,
+  //           ),
+  //     ),
+  //   );
+  // }
+
+    Future<void> _goToSettings() async {
     // Falls der Token noch lädt oder nicht vorhanden ist, abbrechen
     if (_isLoadingToken || _token == null) return;
 
@@ -81,10 +103,11 @@ class ChatPageState extends State<ChatPage> {
       context,
       MaterialPageRoute(
         builder:
-            (_) => InvitePage(
+            (_) => ChatSettings(
               token: _token!, // bereits aus SecureStorage geladen
               chatId: widget.chatId,
               userId: widget.userId,
+              chatName: widget.chatName,
             ),
       ),
     );
@@ -115,7 +138,8 @@ class ChatPageState extends State<ChatPage> {
             final senderId = msg['userid'].toString();
             final isOwnMessage = senderId == widget.userId;
             final photoId = msg['photoid'];
-            final text = msg['text'].toString();
+            final rawText = msg['text'];
+            final String? text = rawText is String && rawText.trim().isNotEmpty ? rawText.trim() : null;
             final createdAt =
                 DateFormat(
                   "yyyy-MM-dd_HH-mm-ss",
@@ -138,12 +162,12 @@ class ChatPageState extends State<ChatPage> {
                   name: "Bild",
                   size: 0,
                   uri: photoUrl,
-                  metadata: {'text': text},
+                  metadata: text != null && text.toString().trim().isNotEmpty ? {'text': text} : null, 
                 ),
               );
             }
 
-            if (text.isNotEmpty) {
+            if (text != null && text.toString().trim().isNotEmpty ) {
               loadedMessages.add(
                 types.TextMessage(
                   author: author,
@@ -228,22 +252,40 @@ class ChatPageState extends State<ChatPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.chatName),
-        backgroundColor: const Color(0xFF3A7CA5),
+        title: Text(
+          widget.chatName,
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: AppColors.greyTextColor,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: AppColors.lightgreyTextBox,
+        scrolledUnderElevation: 0,  // 👉 wichtig
+        elevation: 0,   
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: Icon(
+            Icons.arrow_back,
+            size: 32,
+            color: AppColors.greyTextColor,
+          ),
           onPressed: () => goToHome(context),
         ),
         actions: [
           IconButton(
-            tooltip: 'Benutzer einladen',
-            icon: Icon(Icons.person_add),
-            onPressed: _goToInvite,
+            tooltip: 'Chat Einstellungen',
+            icon: Icon(
+              Icons.more_vert,
+              size: 32,
+              color: AppColors.greyTextColor,
+            ),
+            onPressed: _goToSettings
           ),
         ],
       ),
 
-      backgroundColor: const Color.fromARGB(255, 16, 24, 30),
+      // backgroundColor: const Color.fromARGB(255, 16, 24, 30),
 
       body: Chat(
         messages: _messages,
@@ -254,16 +296,20 @@ class ChatPageState extends State<ChatPage> {
         showUserAvatars: false,
         theme: DefaultChatTheme(
           primaryColor: const Color(0xFF3A7CA5),
-          backgroundColor: const Color(0xFFD9DCD6),
+          backgroundColor: AppColors.white,
           inputBackgroundColor: const Color(0xFF2F6690),
           receivedMessageBodyTextStyle: const TextStyle(
-            color: Color(0xFF16425B),
+            color: AppColors.greyTextColor,
+            fontWeight: FontWeight.w600,
           ),
-          sentMessageBodyTextStyle: const TextStyle(color: Colors.white),
+          sentMessageBodyTextStyle: const TextStyle(
+            color: AppColors.white,
+            fontWeight: FontWeight.w600,
+          ),
           attachmentButtonIcon: Icon(
-            Icons.photo_camera_rounded, 
+            Icons.photo_camera_rounded,
             color: Colors.white,
-            size: 32,           
+            size: 32,
           ),
         ),
       ),

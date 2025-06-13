@@ -1,3 +1,4 @@
+import 'package:chatapp/Shared/Constants/theme.dart';
 import 'package:flutter/material.dart';
 
 class MyTextField extends StatelessWidget {
@@ -15,23 +16,32 @@ class MyTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 25.0),
-              child: TextField(
-                controller: controller,
-                obscureText: obscureText,
-                decoration: InputDecoration(
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.white),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFFD9DCD6)),
-                  ),
-                  fillColor: Colors.grey.shade200,
-                  filled: true,
-                  hintText: hintText,
-                  hintStyle: TextStyle(color: Color(0xFF16425B)),
-                )
-              ),
-            );
+      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+      child: TextField(
+        controller: controller,
+        obscureText: obscureText,
+        style: const TextStyle(
+          fontSize: 20,
+        ),
+        decoration: InputDecoration(
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 24,
+            vertical: 16,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide(color: Colors.white),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide(color: Color(0xFFD9DCD6)),
+          ),
+          fillColor: AppColors.lightgreyTextBox,
+          filled: true,
+          hintText: hintText,
+          hintStyle: TextStyle(color: AppColors.ligthgreyBackgroundcolor),
+        ),
+      ),
+    );
   }
 }

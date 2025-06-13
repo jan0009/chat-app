@@ -1,12 +1,14 @@
 import 'dart:async';
 import 'package:chatapp/Shared/Constants/ApiConstants.dart';
+import 'package:chatapp/Shared/Constants/theme.dart';
 import 'package:chatapp/View/Entities/user_logout.dart';
 import 'package:chatapp/View/Pages/account_page.dart';
 import 'package:chatapp/View/Pages/chat_page.dart';
 import 'package:chatapp/View/Widgets/login.dart';
-import 'package:chatapp/components/MyButton.dart';
+import 'package:chatapp/components/ChatButton.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:logger/logger.dart';
@@ -25,7 +27,6 @@ class _HomePageState extends State<HomePage> {
   List<Map<String, dynamic>> _chats = [];
   Timer? _refreshTimer;
 
-
   final FlutterSecureStorage secureStorage = FlutterSecureStorage();
   final logger = Logger();
 
@@ -34,6 +35,7 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     userId = widget.userId;
     fetchChatsFromServer();
+    
 
     _refreshTimer = Timer.periodic(
     const Duration(seconds: 5),
@@ -155,25 +157,73 @@ class _HomePageState extends State<HomePage> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text("Neuen Chat erstellen"),
+            backgroundColor: AppColors.white, 
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(48),
+            ), 
+            title: Row(
+                children: const [
+                  Icon(Icons.chat, color: AppColors.blue, size: 40),
+                  SizedBox(width: 8), // Abstand zwischen Icon und Text
+                  Text(
+                    "Neuen Chat erstellen",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
             content: TextField(
               controller: _chatNameController,
               decoration: const InputDecoration(hintText: "Chatname"),
             ),
             actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text("Abbrechen"),
+              SizedBox(
+                width: 128,
+                height: 48,
+                child: TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: TextButton.styleFrom(
+                    backgroundColor: AppColors.greyTextColor,
+                    foregroundColor: AppColors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(48),
+                    ),
+                  ),
+                  child: const Text(
+                    "Abbrechen",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
               ),
-              ElevatedButton(
-                onPressed: () async {
-                  final name = _chatNameController.text.trim();
-                  if (name.isNotEmpty) {
-                    await _createChat(name);
-                    Navigator.pop(context);
-                  }
-                },
-                child: const Text("Erstellen"),
+              SizedBox(
+                width: 128,
+                height: 48,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    final name = _chatNameController.text.trim();
+                    if (name.isNotEmpty) {
+                      await _createChat(name);
+                      Navigator.pop(context);
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.blue,
+                    foregroundColor: AppColors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(48),
+                    ),
+                    elevation: 0, // Optional: kein Schatten, damit er wie der TextButton wirkt
+                  ),
+                  child: const Text(
+                    "Erstellen",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
               ),
             ],
           ),
@@ -284,60 +334,90 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF3A7CA5),
-        title: const Text(
-          "Home",
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        centerTitle: true,
+    // return Scaffold(
+    //   appBar: AppBar(
+    //     backgroundColor: const Color(0xFF3A7CA5),
+    //     title: const Text(
+    //       "Home",
+    //       style: TextStyle(
+    //         color: Colors.white,
+    //         fontSize: 20,
+    //         fontWeight: FontWeight.bold,
+    //       ),
+    //     ),
+    //     centerTitle: true,
 
-        leading: IconButton(
-          icon: const Icon(Icons.logout, color: Colors.white),
-          onPressed: () async {
-            handleLogout(context);
-            goToLogin(context);
-          },
-        ),
+    //     leading: IconButton(
+    //       icon: const Icon(Icons.logout, color: Colors.white),
+    //       onPressed: () async {
+    //         handleLogout(context);
+    //         goToLogin(context);
+    //       },
+    //     ),
 
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.account_circle, color: Colors.white),
-            onPressed: () => goToAccountPage(context),
-          ),
-          // IconButton(
-          //   icon: const Icon(Icons.add, color: Colors.white),
-          //   tooltip: 'Neuen Chat erstellen',
-          //   onPressed: () => goToCreateChatDialog(context),
-          // ),
-        ],
+    //     actions: [
+    //       IconButton(
+    //         icon: const Icon(Icons.account_circle, color: Colors.white),
+    //         onPressed: () => goToAccountPage(context),
+    //       ),
+    //     ],
 
-        elevation: 4.0,
-      ),
+    //     elevation: 4.0,
+    //   ),
 
-      backgroundColor: Color(0xFFb9d0e2),
+  // neue Appbar hier ist jetzt aber in der Navigation
+  return Scaffold(
+  //   appBar: AppBar(
+  //     automaticallyImplyLeading: false,
+  //     backgroundColor: AppColors.lightgreyTextBox,
+  //     toolbarHeight: 132,
+  //     flexibleSpace: Builder(
+  //       builder: (context) {
+  //         final topPadding = MediaQuery.of(context).padding.top + 24; // Dynamisch + extra Abstand
+  //         return Padding(
+  //           padding: EdgeInsets.only(top: topPadding, left: 48),
+  //           child: Align(
+  //             alignment: Alignment.topLeft,
+  //             child: Row(
+  //               mainAxisSize: MainAxisSize.min,
+  //               children: [
+  //                 Image.asset(
+  //                   'lib/images/Chatalyst-Icon.png',
+  //                   width: 84,
+  //                   height: 84,
+  //                 ),
+  //                 const SizedBox(width: 32),
+  //                 Image.asset(
+  //                   'lib/images/Chatalyst-Text.png',
+  //                   width: 166,
+  //                   height: 48,
+  //                 ),
+  //               ],
+  //             ),
+  //           ),
+  //         );
+  //       },
+  //     ),
+  //   ),
+
+      backgroundColor: AppColors.white,
       body:
           _chats.isEmpty
               ? const Center(
                 child: Text("Keine Chats verfügbar oder Fehler beim Laden."),
               ) // Ladeanzeige
               : ListView.builder(
-                padding: const EdgeInsets.only(top: 20.0),
+                padding: const EdgeInsets.only(top: 0.0),
                 itemCount: _chats.length,
                 itemBuilder: (context, index) {
                   final chat = _chats[index];
 
                   return Padding(
-                    padding: const EdgeInsets.only(top: 8.0, right: 8, left: 8),
+                    padding: const EdgeInsets.only(top: 24.0, right: 16, left: 16),
                     child: Row(
                       children: [
                         Expanded(
-                          child: MyButton(
+                          child: ChatButton(
                             onTap:
                                 () => goToChat(
                                   context,
@@ -346,62 +426,40 @@ class _HomePageState extends State<HomePage> {
                                 ),
                             buttonText:
                                 chat['chatname'], // Dynamischer Chatname
-                            fontSize: 14,
-                            margin: const EdgeInsets.symmetric(horizontal: 10),
-                            padding: const EdgeInsets.all(10),
-                            backgroundColor: const Color(0xFF3A7CA5),
+                            fontSize: 18,
+                            margin: const EdgeInsets.symmetric(horizontal: 0),
+                            padding: const EdgeInsets.all(0),
+                            backgroundColor: AppColors.lightgreyTextBox,
                           ),
                         ),
-                        if (chat['chatid'] != "0")
-                          IconButton(
-                            icon: Icon(Icons.delete, color: Color(0xDD16425B)),
-                            onPressed: () {
-                              showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return AlertDialog(
-                                    title: const Text("Chat löschen"),
-                                    content: const Text(
-                                      "Möchtest du diesen Chat wirklich löschen?",
-                                    ),
-                                    actions: [
-                                      TextButton(
-                                        child: const Text("Abbrechen"),
-                                        onPressed:
-                                            () => Navigator.of(context).pop(),
-                                      ),
-                                      TextButton(
-                                        child: const Text(
-                                          "Löschen",
-                                          style: TextStyle(color: Colors.red),
-                                        ),
-                                        onPressed: () {
-                                          Navigator.of(
-                                            context,
-                                          ).pop(); // Dialog schließen
-                                          deleteChat(
-                                            chat['chatid'],
-                                          ); // Chat löschen
-                                        },
-                                      ),
-                                    ],
-                                  );
-                                },
-                              );
-                            },
-                          ),
                       ],
                     ),
                   );
                 },
               ),
-      floatingActionButton: FloatingActionButton(
-        tooltip: 'Aktionen',
-        backgroundColor: const Color(0xFF3A7CA5),
-        foregroundColor: Colors.white,
-        child: const Icon(Icons.more_vert, color: Colors.white),
-        onPressed: () => _showFabMenu(context), // ← Menü öffnen
+      floatingActionButton: SizedBox(
+        height: 64,
+        width: 64,
+        child: FloatingActionButton(
+          backgroundColor: AppColors.blue,
+          child: const Icon(Icons.add, color: Colors.white, size: 32),
+          onPressed: () => goToCreateChatDialog(context),
+        ),
       ),
+      // bottomNavigationBar: GNav(
+      //   backgroundColor: AppColors.lightgreyTextBox,
+      //   color: AppColors.ligthgreyBackgroundcolor,
+      //   activeColor: AppColors.black,
+      //   gap: 8,
+      //   padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+
+      //   tabMargin: const EdgeInsets.fromLTRB(0, 0, 0, 48),
+      //   tabs: const [
+      //     GButton(icon: Icons.today, iconSize: 48),
+      //     GButton(icon: Icons.chat, iconSize: 48),
+      //     GButton(icon: Icons.groups, iconSize: 48),
+      //     GButton(icon: Icons.settings, iconSize: 48),
+      // ]),
     );
   }
 
@@ -423,34 +481,34 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void _showFabMenu(BuildContext ctx) {
-    showModalBottomSheet(
-      context: ctx,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder:
-          (_) => Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: const Icon(Icons.mail_outline),
-                title: const Text('Einladungen'),
-                onTap: () {
-                  Navigator.pop(ctx); // Bottom-Sheet schließen
-                  _openInviteInbox(); // vorhandene Funktion
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.add),
-                title: const Text('Neuen Chat erstellen'),
-                onTap: () {
-                  Navigator.pop(ctx);
-                  goToCreateChatDialog(ctx); // vorhandene Funktion
-                },
-              ),
-            ],
-          ),
-    );
-  }
+  // void _showFabMenu(BuildContext ctx) {
+  //   showModalBottomSheet(
+  //     context: ctx,
+  //     shape: const RoundedRectangleBorder(
+  //       borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+  //     ),
+  //     builder:
+  //         (_) => Column(
+  //           mainAxisSize: MainAxisSize.min,
+  //           children: [
+  //             ListTile(
+  //               leading: const Icon(Icons.mail_outline),
+  //               title: const Text('Einladungen'),
+  //               onTap: () {
+  //                 Navigator.pop(ctx); // Bottom-Sheet schließen
+  //                 _openInviteInbox(); // vorhandene Funktion
+  //               },
+  //             ),
+  //             ListTile(
+  //               leading: const Icon(Icons.add),
+  //               title: const Text('Neuen Chat erstellen'),
+  //               onTap: () {
+  //                 Navigator.pop(ctx);
+  //                 goToCreateChatDialog(ctx); // vorhandene Funktion
+  //               },
+  //             ),
+  //           ],
+  //         ),
+  //   );
+  // }
 }

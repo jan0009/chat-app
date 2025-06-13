@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:chatapp/View/Pages/home_page.dart';
-import 'package:chatapp/components/My_app_bar.dart';
 import 'package:chatapp/components/MyButton.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
@@ -94,10 +93,10 @@ class AccountPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(
-        title: "Account",
-        onBackPressed: () => goToHome(context),
-      ),
+      // appBar: CustomAppBar(
+      //   title: "Account",
+      //   onBackPressed: () => goToHome(context),
+      // ),
 
       backgroundColor: const Color(0xFFb9d0e2),
 

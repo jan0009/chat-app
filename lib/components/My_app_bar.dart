@@ -1,3 +1,4 @@
+import 'package:chatapp/Shared/Constants/theme.dart';
 import 'package:flutter/material.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -13,21 +14,25 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      backgroundColor: const Color(0xFF3A7CA5), 
+      backgroundColor: AppColors.lightgreyTextBox, 
       title: Text(
         title,   
         style: const TextStyle(
-          color: Colors.white,
+          color: AppColors.greyTextColor,
           fontSize: 20,
           fontWeight: FontWeight.bold,
         ),
       ),
       centerTitle: true,
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: Colors.white),
+        icon: const Icon(
+          Icons.arrow_back,
+           color: AppColors.greyTextColor,
+           size: 32),
         onPressed: onBackPressed ?? () => Navigator.pop(context), 
       ),
-      elevation: 4.0, 
+      elevation: 0.0, 
+      scrolledUnderElevation: 0,
     );
   }
 
