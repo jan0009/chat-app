@@ -1,12 +1,9 @@
 import 'package:chatapp/Shared/Constants/ApiConstants.dart';
 import 'package:chatapp/View/BottomNavBar/navigation.dart';
-import 'package:chatapp/View/Entities/user_validateToken.dart';
-import 'package:chatapp/View/Widgets/login.dart';
-import 'package:chatapp/view/Pages/home_page.dart';
+import 'package:chatapp/View/Pages/login.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class AuthCheckPage extends StatefulWidget {

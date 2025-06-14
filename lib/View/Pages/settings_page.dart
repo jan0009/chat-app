@@ -14,12 +14,12 @@ class ChatSettings extends StatelessWidget {
   final String chatName;
 
   ChatSettings({
-    Key? key,
+    super.key,
     required this.token,
     required this.chatId,
     required this.userId,
     required this.chatName,
-  }) : super(key: key);
+  });
 
   final logger = Logger();
 

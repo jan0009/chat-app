@@ -1,17 +1,16 @@
 import 'dart:async';
 import 'package:chatapp/Shared/Constants/ApiConstants.dart';
 import 'package:chatapp/Shared/Constants/theme.dart';
-import 'package:chatapp/View/Entities/user_logout.dart';
 import 'package:chatapp/View/Pages/account_page.dart';
 import 'package:chatapp/View/Pages/chat_page.dart';
-import 'package:chatapp/View/Widgets/login.dart';
+import 'package:chatapp/View/Pages/login.dart';
 import 'package:chatapp/components/ChatButton.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:logger/logger.dart';
-import 'package:chatapp/View/Pages/inbox_page.dart';
 
 class HomePage extends StatefulWidget {
   final String userId;
@@ -25,6 +24,7 @@ class _HomePageState extends State<HomePage> {
   late final String userId;
   List<Map<String, dynamic>> _chats = [];
   Timer? _refreshTimer;
+  bool isLoading = true;
 
   final FlutterSecureStorage secureStorage = FlutterSecureStorage();
   final logger = Logger();
@@ -34,11 +34,10 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     userId = widget.userId;
     fetchChatsFromServer();
-    
 
     _refreshTimer = Timer.periodic(
-    const Duration(seconds: 5),
-    (_) => fetchChatsFromServer(),
+      const Duration(seconds: 5),
+      (_) => fetchChatsFromServer(),
     );
   }
 
@@ -54,45 +53,16 @@ class _HomePageState extends State<HomePage> {
       MaterialPageRoute(builder: (context) => LoginPage()),
     );
   }
-  
-  Future<UserLogout?> fetchApiLogout(String token) async {
-    try {
-      String apiUrl =
-          '${ApiConstants.baseUrl}'
-          '${ApiConstants.getLogout}'
-          '&token=$token';
-
-      final uri = Uri.parse(apiUrl);
-      final response = await http.get(uri);
-
-      if (response.statusCode == 200) {
-        return UserLogout.fromJson(jsonDecode(response.body));
-      } else {
-        logger.d('API Fehler: ${response.statusCode} - $apiUrl');
-        return null;
-      }
-    } catch (e, stacktrace) {
-      logger.e('Fehler beim Abrufen der API: $e');
-      logger.e('Stacktrace: $stacktrace');
-      return null;
-    }
-  }
 
   void goToChat(BuildContext context, String chatId, String chatName) {
-    if (userId != null) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder:
-              (context) =>
-                  ChatPage(chatId: chatId, chatName: chatName, userId: userId),
-        ),
-      );
-    } else {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Fehler: Keine userId gefunden.')));
-    }
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder:
+            (context) =>
+                ChatPage(chatId: chatId, chatName: chatName, userId: userId),
+      ),
+    );
   }
 
   void goToAccountPage(BuildContext context) {
@@ -109,20 +79,20 @@ class _HomePageState extends State<HomePage> {
       context: context,
       builder:
           (context) => AlertDialog(
-            backgroundColor: AppColors.white, 
+            backgroundColor: AppColors.white,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(48),
-            ), 
+            ),
             title: Row(
-                children: const [
-                  Icon(Icons.chat, color: AppColors.blue, size: 40),
-                  SizedBox(width: 8), // Abstand zwischen Icon und Text
-                  Text(
-                    "Neuen Chat erstellen",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
+              children: const [
+                Icon(Icons.chat, color: AppColors.blue, size: 40),
+                SizedBox(width: 8), // Abstand zwischen Icon und Text
+                Text(
+                  "Neuen Chat erstellen",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
             content: TextField(
               controller: _chatNameController,
               decoration: const InputDecoration(hintText: "Chatname"),
@@ -142,10 +112,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                   child: const Text(
                     "Abbrechen",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
@@ -166,14 +133,12 @@ class _HomePageState extends State<HomePage> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(48),
                     ),
-                    elevation: 0, // Optional: kein Schatten, damit er wie der TextButton wirkt
+                    elevation:
+                        0, // Optional: kein Schatten, damit er wie der TextButton wirkt
                   ),
                   child: const Text(
                     "Erstellen",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
@@ -192,7 +157,6 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> fetchChatsFromServer() async {
     const String apiUrl = '${ApiConstants.baseUrl}${ApiConstants.getChats}';
-
     String? token = await getToken();
 
     if (token == null) {
@@ -202,33 +166,91 @@ class _HomePageState extends State<HomePage> {
 
     try {
       final uri = Uri.parse('$apiUrl&token=$token');
-
       final response = await http.get(uri);
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = jsonDecode(response.body);
-
         if (data.containsKey('chats')) {
-          setState(() {
-            _chats =
-                (data['chats'] as List<dynamic>).map<Map<String, dynamic>>((
-                  chat,
-                ) {
-                  return {
-                    'chatid': chat['chatid'].toString(),
-                    'chatname': chat['chatname'] ?? 'Unbekannter Chat',
-                  };
-                }).toList();
+          List<Map<String, dynamic>> loadedChats = [];
+          for (final chat in data['chats']) {
+            final chatId = chat['chatid'].toString();
+            final chatName = chat['chatname'] ?? 'Unbekannter Chat';
+
+            // API call für letzte Nachricht:
+            final msgUri = Uri.parse(
+              '${ApiConstants.baseUrl}getmessages&token=$token&chatid=$chatId',
+            );
+            final msgResponse = await http.get(msgUri);
+
+            String? lastMessage;
+            String? lastTime;
+
+            if (msgResponse.statusCode == 200) {
+              final msgData = jsonDecode(msgResponse.body);
+              final List<dynamic>? messages = msgData['messages'];
+
+              if (messages != null && messages.isNotEmpty) {
+              final lastMsg = messages.last;
+              lastMessage = (lastMsg['text'] != null && lastMsg['text'].toString().trim().isNotEmpty)
+                            ? '${lastMsg['usernick'] ?? 'Unbekannt'}: ${lastMsg['text']}'
+                            : '${lastMsg['usernick'] ?? 'Unbekannt'}: 📷 Bild';
+              lastTime = lastMsg['time'];
+              }
+            }
+
+            loadedChats.add({
+              'chatid': chatId,
+              'chatname': chatName,
+              'lastmessage': lastMessage ?? '',
+              'lastmessage_time': lastTime ?? '',
+            });
+          }
+
+          loadedChats.sort((a, b) {
+            final aTime = _parseDateTime(a['lastmessage_time']);
+            final bTime = _parseDateTime(b['lastmessage_time']);
+            return bTime.compareTo(aTime); // Neueste zuerst
           });
+
+          if (mounted) {
+            setState(() {
+              _chats = loadedChats;
+              isLoading = false;
+            });
+          }
         } else {
           logger.e("Kein 'chats'-Schlüssel in der Antwort gefunden.");
+            if (mounted) {
+              setState(() {
+                isLoading = false;
+              });
+            }
         }
       } else {
         logger.e("Fehler beim Abrufen der Chats: ${response.statusCode}");
         logger.e("Response Body: ${response.body}");
+          if (mounted) {
+            setState(() {
+              isLoading = false;
+            });
+          }
       }
     } catch (e) {
       logger.e("Fehler beim Abrufen der Chats: $e");
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
+  }
+
+  DateTime _parseDateTime(String? raw) {
+    if (raw == null || raw.isEmpty) return DateTime.fromMillisecondsSinceEpoch(0);
+    try {
+      return DateFormat("yyyy-MM-dd_HH-mm-ss").parse(raw);
+    } catch (e) {
+      return DateTime.fromMillisecondsSinceEpoch(0); // sehr alt, falls Fehler
     }
   }
 
@@ -258,80 +280,89 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  Future<void> deleteChat(String chatId) async {
-    final token = await secureStorage.read(key: "auth_token");
-    if (token == null) {
-      logger.e("Kein Token gefunden");
-      return;
-    }
-
-    final uri = Uri.parse(
-      '${ApiConstants.baseUrl}deletechat&token=$token&chatid=$chatId',
-    );
+  String formatDateLabel(String? rawDateTime) {
+    if (rawDateTime == null || rawDateTime.isEmpty) return '';
 
     try {
-      final response = await http.get(uri);
-      if (response.statusCode == 200) {
-        logger.i("Chat $chatId gelöscht");
-        await fetchChatsFromServer();
+      final date = DateFormat("yyyy-MM-dd_HH-mm-ss").parse(rawDateTime);
+      final now = DateTime.now();
+
+      final today = DateTime(now.year, now.month, now.day);
+      final yesterday = today.subtract(const Duration(days: 1));
+      final dateOnly = DateTime(date.year, date.month, date.day);
+
+      if (dateOnly == today) {
+        return 'Heute';
+      } else if (dateOnly == yesterday) {
+        return 'Gestern';
       } else {
-        logger.e("Fehler beim Löschen: ${response.statusCode}");
+        return DateFormat('dd.MM.yyyy').format(date); // z. B. 12.04.2025
       }
     } catch (e) {
-      logger.e("❌ Fehler beim Löschen des Chats: $e");
+      logger.e("❌ Fehler beim Parsen von Datum: $rawDateTime");
+      return '';
     }
   }
 
   @override
   Widget build(BuildContext context) {
-  // neue Appbar hier ist jetzt aber in der Navigation
-  return Scaffold(
+    // neue Appbar hier ist jetzt aber in der Navigation
+    return Scaffold(
       backgroundColor: AppColors.white,
-      body:
-          _chats.isEmpty
-              ? const Center(
-                child: Text("Keine Chats verfügbar oder Fehler beim Laden."),
-              ) // Ladeanzeige
-              : ListView.builder(
-                padding: const EdgeInsets.only(top: 0.0),
-                itemCount: _chats.length,
-                itemBuilder: (context, index) {
-                  final chat = _chats[index];
+      body: isLoading
+        ? const Center(
+          child: CircularProgressIndicator(),
+          )
+          : _chats.isEmpty
+                ? const Center(
+                  child: Text("Keine Chats verfügbar oder Fehler beim Laden."),
+                ) // Ladeanzeige
+                : ListView.builder(
+                  padding: const EdgeInsets.only(top: 0.0),
+                  itemCount: _chats.length,
+                  itemBuilder: (context, index) {
+                    final chat = _chats[index];
 
-                  return Padding(
-                    padding: const EdgeInsets.only(top: 24.0, right: 16, left: 16),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: ChatButton(
-                            onTap:
-                                () => goToChat(
-                                  context,
-                                  chat['chatid'],
-                                  chat['chatname'],
-                                ),
-                            buttonText:
-                                chat['chatname'], // Dynamischer Chatname
-                            fontSize: 18,
-                            margin: const EdgeInsets.symmetric(horizontal: 0),
-                            padding: const EdgeInsets.all(0),
-                            backgroundColor: AppColors.lightgreyTextBox,
+                    return Padding(
+                      padding: const EdgeInsets.only(
+                        top: 24.0,
+                        right: 16,
+                        left: 16,
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: ChatButton(
+                              onTap:
+                                  () => goToChat(
+                                    context,
+                                    chat['chatid'],
+                                    chat['chatname'],
+                                  ),
+                              buttonText:
+                                  chat['chatname'], // Dynamischer Chatname
+                              lastText: chat['lastmessage'],
+                              dateTime: formatDateLabel(chat['lastmessage_time']),
+                              fontSize: 18,
+                              margin: const EdgeInsets.symmetric(horizontal: 0),
+                              padding: const EdgeInsets.all(0),
+                              backgroundColor: AppColors.lightgreyTextBox,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-      floatingActionButton: SizedBox(
-        height: 64,
-        width: 64,
-        child: FloatingActionButton(
-          backgroundColor: AppColors.blue,
-          child: const Icon(Icons.add, color: Colors.white, size: 32),
-          onPressed: () => goToCreateChatDialog(context),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+        floatingActionButton: SizedBox(
+          height: 64,
+          width: 64,
+          child: FloatingActionButton(
+            backgroundColor: AppColors.blue,
+            child: const Icon(Icons.add, color: Colors.white, size: 32),
+            onPressed: () => goToCreateChatDialog(context),
+          ),
         ),
-      ),
     );
   }
 }

@@ -29,7 +29,7 @@ class QuotesPage extends StatelessWidget {
             title: const Align(
               alignment: Alignment.topCenter,
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(0, 0, 0, 16), // hier kannst du feinsteuern
+                padding: EdgeInsets.fromLTRB(0, 0, 0, 16), 
                 child: Text(
                   'Sprüche des Tages',
                   style: TextStyle(color: AppColors.greyTextColor ,fontSize: 24, fontWeight: FontWeight.bold),

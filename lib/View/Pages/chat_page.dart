@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:chatapp/Shared/Constants/theme.dart';
 import 'package:chatapp/View/Pages/camera_page.dart';
 import 'package:chatapp/View/Pages/settings_page.dart';
@@ -59,11 +58,6 @@ class ChatPageState extends State<ChatPage> {
 
   void goToHome(BuildContext context) {
     Navigator.pop(context);
-
-    // Navigator.push(
-    //   context,
-    //   MaterialPageRoute(builder: (context) => HomePage(userId: widget.userId)),
-    // );
   }
 
   Future<void> _loadToken() async {
@@ -74,25 +68,7 @@ class ChatPageState extends State<ChatPage> {
     });
   }
 
-  // Future<void> _goToInvite() async {
-  //   // Falls der Token noch lädt oder nicht vorhanden ist, abbrechen
-  //   if (_isLoadingToken || _token == null) return;
-
-  //   if (!mounted) return; // Safety-check
-  //   Navigator.push(
-  //     context,
-  //     MaterialPageRoute(
-  //       builder:
-  //           (_) => InvitePage(
-  //             token: _token!, // bereits aus SecureStorage geladen
-  //             chatId: widget.chatId,
-  //             userId: widget.userId,
-  //           ),
-  //     ),
-  //   );
-  // }
-
-    Future<void> _goToSettings() async {
+  Future<void> _goToSettings() async {
     // Falls der Token noch lädt oder nicht vorhanden ist, abbrechen
     if (_isLoadingToken || _token == null) return;
 

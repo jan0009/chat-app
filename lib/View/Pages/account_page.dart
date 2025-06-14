@@ -1,14 +1,13 @@
 import 'package:chatapp/Shared/Constants/theme.dart';
 import 'package:chatapp/View/Entities/user_logout.dart';
+import 'package:chatapp/View/Pages/login.dart';
 import 'package:chatapp/components/ButtonWithIcon.dart';
 import 'package:flutter/material.dart';
 import 'package:chatapp/View/Pages/home_page.dart';
-import 'package:chatapp/components/MyButton.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:logger/logger.dart';
-import 'package:chatapp/View/Widgets/login.dart';
 import 'package:chatapp/View/Entities/user_deregister.dart';
 import 'package:chatapp/Shared/Constants/ApiConstants.dart';
 

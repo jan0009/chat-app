@@ -2,7 +2,7 @@ import 'package:chatapp/Shared/Constants/ApiConstants.dart';
 import 'package:chatapp/Shared/Constants/theme.dart';
 import 'package:chatapp/View/Entities/user_register.dart';
 import 'package:chatapp/View/Pages/home_page.dart';
-import 'package:chatapp/View/Widgets/login.dart';
+import 'package:chatapp/View/Pages/login.dart';
 import 'package:flutter/material.dart';
 import 'package:chatapp/components/MyButton.dart';
 import 'package:chatapp/components/MyTextField.dart';

@@ -13,8 +13,8 @@ class PreviewPage extends StatefulWidget {
 
   const PreviewPage({
     super.key,
-     required this.imageBytes,
-     required this.chatId
+    required this.imageBytes,
+    required this.chatId
   });
 
   @override

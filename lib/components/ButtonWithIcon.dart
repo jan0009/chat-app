@@ -39,9 +39,9 @@ class ButtonWithIcon extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black26, // Weicher Schatten
-              blurRadius: 4, // Wie stark verschwommen
-              offset: Offset(0, 2), // x: 0 (zentriert), y: 3 (nach unten)
+              color: Colors.black26,
+              blurRadius: 4, 
+              offset: Offset(0, 2), 
             ),
           ],
         ),

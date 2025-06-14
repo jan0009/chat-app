@@ -1,5 +1,5 @@
 class ApiConstants {
-  // Constanten fÃ¼r Api Requests
+  // Constanten für Api Requests
   static const String baseUrl =
       "https://www2.hs-esslingen.de/~melcher/map/chat/api?request=";
   static const String postUrl =

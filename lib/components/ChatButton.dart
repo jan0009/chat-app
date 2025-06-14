@@ -9,7 +9,7 @@ class ChatButton extends StatelessWidget {
   final EdgeInsetsGeometry margin;
   final EdgeInsetsGeometry padding;
   final Color backgroundColor;
-  final DateTime? dateTime;
+  final String? dateTime;
 
   const ChatButton({
     super.key,
@@ -40,10 +40,10 @@ class ChatButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(48),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.2), // Schattenfarbe mit Transparenz
-              offset: Offset(0, 2),                  // x, y Verschiebung
-              blurRadius: 4,                         // Weichheit
-              spreadRadius: 1,                       // Ausbreitung
+              color: Colors.black.withOpacity(0.2), 
+              offset: Offset(0, 2),                  
+              blurRadius: 4,                         
+              spreadRadius: 1,                       
             ),
           ],
         ),
@@ -66,25 +66,33 @@ class ChatButton extends StatelessWidget {
                   ),
                 ),
                 if (dateTime != null)
-                  Text(
-                    _formatDateTime(dateTime!),
-                    style: TextStyle(
-                      color:  AppColors.greyTextColor,
-                      fontWeight: FontWeight.normal,
-                      fontSize: fontSize - 4,
+                  Padding(
+                    padding: const EdgeInsets.only(right: 28.0),
+                    child: Text(
+                      dateTime!,
+                      style: TextStyle(
+                        color:  AppColors.greyTextColor,
+                        fontWeight: FontWeight.normal,
+                        fontSize: fontSize - 4,
+                      ),
                     ),
                   ),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 4),
             // Zweite Zeile: lastText (falls vorhanden)
             if (lastText != null)
-              Text(
-                lastText!,
-                style: TextStyle(
-                  color:  AppColors.greyTextColor,
-                  fontWeight: FontWeight.normal,
-                  fontSize: fontSize - 4,
+              Padding(
+                padding: const EdgeInsets.only(left: 24.0),
+                child: Text(
+                  lastText!,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color:  AppColors.greyTextColor,
+                    fontWeight: FontWeight.normal,
+                    fontSize: fontSize - 4,
+                  ),
                 ),
               ),
           ],
