@@ -8,7 +8,6 @@ import 'package:chatapp/View/Widgets/login.dart';
 import 'package:chatapp/components/ChatButton.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:logger/logger.dart';
@@ -55,54 +54,7 @@ class _HomePageState extends State<HomePage> {
       MaterialPageRoute(builder: (context) => LoginPage()),
     );
   }
-
-  Future<void> handleLogout(BuildContext context) async {
-    // Store ScaffoldMessengerState before async operation
-    final messenger = ScaffoldMessenger.of(context);
-
-    // Get token from Secure Storage
-    String? token = await secureStorage.read(key: "auth_token");
-
-    if (token != null) {
-      try {
-        UserLogout? userLogout = await fetchApiLogout(token);
-        if (userLogout != null) {
-          messenger.showSnackBar(
-            SnackBar(
-              content: Text(userLogout.message),
-              duration: Duration(seconds: 4),
-            ),
-          );
-          if (userLogout.success == true) {
-            bool hasToken = await secureStorage.containsKey(key: "auth_token");
-            bool hasUserId = await secureStorage.containsKey(key: "userid");
-            bool hasPassword = await secureStorage.containsKey(key: "password");
-            
-            if (hasToken) {
-              await secureStorage.delete(key: "auth_token");
-            }
-            if(hasUserId){
-              await secureStorage.delete(key: "userid");
-            }
-            if(hasPassword){
-              await secureStorage.delete(key: "password");
-            }
-          }
-        }
-      } catch (error) {
-        messenger.showSnackBar(
-          SnackBar(
-            content: Text("Fehler beim Logout: $error"),
-            duration: Duration(seconds: 8),
-          ),
-        );
-      }
-
-      // Token nach erfolgreichem Logout löschen
-      await secureStorage.delete(key: "auth_token");
-    }
-  }
-
+  
   Future<UserLogout?> fetchApiLogout(String token) async {
     try {
       String apiUrl =
@@ -238,8 +190,6 @@ class _HomePageState extends State<HomePage> {
     return token;
   }
 
-  // List<Map<String, dynamic>> _chats = [];
-
   Future<void> fetchChatsFromServer() async {
     const String apiUrl = '${ApiConstants.baseUrl}${ApiConstants.getChats}';
 
@@ -334,72 +284,8 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // return Scaffold(
-    //   appBar: AppBar(
-    //     backgroundColor: const Color(0xFF3A7CA5),
-    //     title: const Text(
-    //       "Home",
-    //       style: TextStyle(
-    //         color: Colors.white,
-    //         fontSize: 20,
-    //         fontWeight: FontWeight.bold,
-    //       ),
-    //     ),
-    //     centerTitle: true,
-
-    //     leading: IconButton(
-    //       icon: const Icon(Icons.logout, color: Colors.white),
-    //       onPressed: () async {
-    //         handleLogout(context);
-    //         goToLogin(context);
-    //       },
-    //     ),
-
-    //     actions: [
-    //       IconButton(
-    //         icon: const Icon(Icons.account_circle, color: Colors.white),
-    //         onPressed: () => goToAccountPage(context),
-    //       ),
-    //     ],
-
-    //     elevation: 4.0,
-    //   ),
-
   // neue Appbar hier ist jetzt aber in der Navigation
   return Scaffold(
-  //   appBar: AppBar(
-  //     automaticallyImplyLeading: false,
-  //     backgroundColor: AppColors.lightgreyTextBox,
-  //     toolbarHeight: 132,
-  //     flexibleSpace: Builder(
-  //       builder: (context) {
-  //         final topPadding = MediaQuery.of(context).padding.top + 24; // Dynamisch + extra Abstand
-  //         return Padding(
-  //           padding: EdgeInsets.only(top: topPadding, left: 48),
-  //           child: Align(
-  //             alignment: Alignment.topLeft,
-  //             child: Row(
-  //               mainAxisSize: MainAxisSize.min,
-  //               children: [
-  //                 Image.asset(
-  //                   'lib/images/Chatalyst-Icon.png',
-  //                   width: 84,
-  //                   height: 84,
-  //                 ),
-  //                 const SizedBox(width: 32),
-  //                 Image.asset(
-  //                   'lib/images/Chatalyst-Text.png',
-  //                   width: 166,
-  //                   height: 48,
-  //                 ),
-  //               ],
-  //             ),
-  //           ),
-  //         );
-  //       },
-  //     ),
-  //   ),
-
       backgroundColor: AppColors.white,
       body:
           _chats.isEmpty
@@ -446,69 +332,6 @@ class _HomePageState extends State<HomePage> {
           onPressed: () => goToCreateChatDialog(context),
         ),
       ),
-      // bottomNavigationBar: GNav(
-      //   backgroundColor: AppColors.lightgreyTextBox,
-      //   color: AppColors.ligthgreyBackgroundcolor,
-      //   activeColor: AppColors.black,
-      //   gap: 8,
-      //   padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
-
-      //   tabMargin: const EdgeInsets.fromLTRB(0, 0, 0, 48),
-      //   tabs: const [
-      //     GButton(icon: Icons.today, iconSize: 48),
-      //     GButton(icon: Icons.chat, iconSize: 48),
-      //     GButton(icon: Icons.groups, iconSize: 48),
-      //     GButton(icon: Icons.settings, iconSize: 48),
-      // ]),
     );
   }
-
-  Future<void> _openInviteInbox() async {
-    final token = await secureStorage.read(key: 'auth_token');
-    if (token == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Kein Token gefunden.')));
-      return;
-    }
-
-    if (!mounted) return;
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => InboxPage(token: token, userId: userId),
-      ),
-    );
-  }
-
-  // void _showFabMenu(BuildContext ctx) {
-  //   showModalBottomSheet(
-  //     context: ctx,
-  //     shape: const RoundedRectangleBorder(
-  //       borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-  //     ),
-  //     builder:
-  //         (_) => Column(
-  //           mainAxisSize: MainAxisSize.min,
-  //           children: [
-  //             ListTile(
-  //               leading: const Icon(Icons.mail_outline),
-  //               title: const Text('Einladungen'),
-  //               onTap: () {
-  //                 Navigator.pop(ctx); // Bottom-Sheet schließen
-  //                 _openInviteInbox(); // vorhandene Funktion
-  //               },
-  //             ),
-  //             ListTile(
-  //               leading: const Icon(Icons.add),
-  //               title: const Text('Neuen Chat erstellen'),
-  //               onTap: () {
-  //                 Navigator.pop(ctx);
-  //                 goToCreateChatDialog(ctx); // vorhandene Funktion
-  //               },
-  //             ),
-  //           ],
-  //         ),
-  //   );
-  // }
 }

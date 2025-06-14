@@ -21,6 +21,7 @@ class QuotesPage extends StatelessWidget {
 
     return Scaffold(
           appBar: AppBar(
+            automaticallyImplyLeading: false,
             backgroundColor: AppColors.lightgreyTextBox,
             elevation: 0.0,
             scrolledUnderElevation: 0,

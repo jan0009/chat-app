@@ -21,8 +21,6 @@ class LoginPage extends StatelessWidget {
   final FlutterSecureStorage secureStorage = FlutterSecureStorage();
   final logger = Logger();
 
-  // //Sign In
-
   void startRegister(BuildContext context) {
     Navigator.push(
       context,
@@ -59,9 +57,6 @@ class LoginPage extends StatelessWidget {
         UserLogin user = UserLogin.fromJson(jsonDecode(response.body));
         await secureStorage.write(key: "userid", value: userNameController.text);
         await secureStorage.write(key: "auth_token", value: user.token);
-
-        //logger.e("token: ${user.token} ");
-
         return user;
       } else {
         logger.d('API Fehler: ${response.statusCode} - $apiUrl');
@@ -140,7 +135,7 @@ class LoginPage extends StatelessWidget {
 
               const SizedBox(height: 80),
 
-              //Welcome
+              // Registrieren
               Text(
                 'Noch nicht dabei ? -  Registrieren dich jetzt ! ',
                 textAlign: TextAlign.center,

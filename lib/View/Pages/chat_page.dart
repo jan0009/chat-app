@@ -5,7 +5,6 @@ import 'package:chatapp/View/Pages/camera_page.dart';
 import 'package:chatapp/View/Pages/settings_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
-import 'package:chatapp/View/Pages/home_page.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:chatapp/Shared/Constants/ApiConstants.dart';
@@ -13,7 +12,6 @@ import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import '../../View/Pages/invite_page.dart';
 
 class ChatPage extends StatefulWidget {
   final String chatId;
@@ -285,11 +283,9 @@ class ChatPageState extends State<ChatPage> {
         ],
       ),
 
-      // backgroundColor: const Color.fromARGB(255, 16, 24, 30),
-
       body: Chat(
         messages: _messages,
-        onAttachmentPressed: _handleAttachmentPressed,
+        onAttachmentPressed: () => _handleImageSelection(context),
         onSendPressed: _handleSendPressed,
         user: types.User(id: widget.userId),
         showUserNames: true,
@@ -309,18 +305,10 @@ class ChatPageState extends State<ChatPage> {
           attachmentButtonIcon: Icon(
             Icons.photo_camera_rounded,
             color: Colors.white,
-            size: 32,
+            size: 40,
           ),
         ),
       ),
-
-      // floatingActionButton: FloatingActionButton(
-      // tooltip: 'Benutzer einladen',
-      // backgroundColor: const Color(0xFF3A7CA5),
-      // foregroundColor: Colors.white,
-      // onPressed: _goToInvite,
-      // child: const Icon(Icons.person_add),
-      // ),
     );
   }
 
@@ -328,62 +316,7 @@ class ChatPageState extends State<ChatPage> {
     sendMessageToServer(message.text);
   }
 
-  void _handleAttachmentPressed() {
-    showModalBottomSheet<void>(
-      context: context,
-      builder:
-          (BuildContext context) => SafeArea(
-            child: SizedBox(
-              height: 200,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  const SizedBox(height: 12),
-
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                      _handleImageSelection(context);
-                    },
-                    child: const Align(
-                      alignment: AlignmentDirectional.center,
-                      child: Text('Photo', style: TextStyle(fontSize: 18)),
-                    ),
-                  ),
-                  const SizedBox(height: 8), // Abstand
-
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                      _handleFileSelection();
-                    },
-                    child: const Align(
-                      alignment: AlignmentDirectional.center,
-                      child: Text('File', style: TextStyle(fontSize: 18)),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Align(
-                      alignment: AlignmentDirectional.center,
-                      child: Text(
-                        'Cancel',
-                        style: TextStyle(fontSize: 18, color: Colors.redAccent),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-    );
-  }
-
-  void _handleFileSelection() async {}
-
-  void _handleImageSelection(BuildContext context) async {
+  void _handleImageSelection(BuildContext context) {
     Navigator.push(
       context,
       MaterialPageRoute(

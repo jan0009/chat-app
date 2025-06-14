@@ -37,10 +37,17 @@ class ButtonWithIcon extends StatelessWidget {
         decoration: BoxDecoration(
           color: backgroundColor,
           borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black26, // Weicher Schatten
+              blurRadius: 4, // Wie stark verschwommen
+              offset: Offset(0, 2), // x: 0 (zentriert), y: 3 (nach unten)
+            ),
+          ],
         ),
         child: Center(
           child: Padding(
-            padding: const EdgeInsets.only(left: 16.0),
+            padding: const EdgeInsets.only(left: 8.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start, // Wichtiger Trick!
               children: [

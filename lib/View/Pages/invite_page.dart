@@ -79,7 +79,7 @@ class _InvitePageState extends State<InvitePage> {
     Navigator.pop(context);
   }
 
-  Future<void> _inviteUser(String invitedHash) async {
+  Future<void> _inviteUser(String invitedHash, String userNickname) async {
     // invite&token=...&chatid=...&invitedhash=...
     final url =
         '${ApiConstants.baseUrl}invite'
@@ -92,12 +92,35 @@ class _InvitePageState extends State<InvitePage> {
       if (response.statusCode == 200) {
         logger.i("User $invitedHash eingeladen!");
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("User $invitedHash wurde eingeladen.")),
+          SnackBar(
+            content: Text(
+              '$userNickname erfolgreich eingeladen!',
+              textAlign: TextAlign.center, // 👈 Zentriert
+              style: const TextStyle(
+                fontSize: 18,               // 👈 Größer
+                fontWeight: FontWeight.bold,
+                color: Colors.white,        // Optional: Lesbarkeit
+              ),
+            ),
+            backgroundColor:Colors.green,
+          ),
         );
       } else {
         logger.e("Fehler beim Einladen: ${response.statusCode}");
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Leider haben Sie keine Berechtigungen Leute einzuladen.")),
+          SnackBar(
+            content: Text(
+              'Du hast den Chat nicht erstellt und kannst keinen Einladen !',
+              textAlign: TextAlign.center, // 👈 Zentriert
+              style: const TextStyle(
+                fontSize: 18,               // 👈 Größer
+                fontWeight: FontWeight.bold,
+                color: Colors.white,        // Optional: Lesbarkeit
+              ),
+            ),
+            backgroundColor:Colors.red,
+            duration: Duration(seconds: 7),
+          ),
         );
       }
     } catch (e) {
@@ -145,7 +168,7 @@ class _InvitePageState extends State<InvitePage> {
                       title: Text(user['nickname']),
                       subtitle: Text("Hash: ${user['hash']}"),
                       trailing: ElevatedButton(
-                        onPressed: () => _inviteUser(user['hash']),
+                        onPressed: () => _inviteUser(user['hash'], user['nickname']),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.blue, // Hier deine Wunschfarbe
                           foregroundColor: Colors.white, // Textfarbe

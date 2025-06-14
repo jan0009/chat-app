@@ -12,9 +12,10 @@ class ApiConstants {
   static const String postmessage = "postmessage";
   static const String getPhoto = "getphoto";
 
-  static const String getprofiles ="getprofiles";
-  static const String createchat ="createchat";
+  static const String getprofiles = "getprofiles";
+  static const String createchat = "createchat";
 
   static const String validateToken = "validatetoken";
+  static const String joinChat = "joinchat";
+  static const String leaveChat = "leavechat";
 }
-
