@@ -1,7 +1,8 @@
 //stless
 import 'package:chatapp/Shared/Constants/apiconstants.dart';
+import 'package:chatapp/Shared/Constants/theme.dart';
+import 'package:chatapp/View/BottomNavBar/navigation.dart';
 import 'package:chatapp/View/Entities/user_login.dart';
-import 'package:chatapp/View/Pages/home_page.dart';
 import 'package:chatapp/View/Pages/register_page.dart';
 import 'package:chatapp/components/MyButton.dart';
 import 'package:chatapp/components/MyTextField.dart';
@@ -19,8 +20,6 @@ class LoginPage extends StatelessWidget {
   final passwordController = TextEditingController();
   final FlutterSecureStorage secureStorage = FlutterSecureStorage();
   final logger = Logger();
-
-  // //Sign In
 
   void startRegister(BuildContext context) {
     Navigator.push(
@@ -58,9 +57,6 @@ class LoginPage extends StatelessWidget {
         UserLogin user = UserLogin.fromJson(jsonDecode(response.body));
         await secureStorage.write(key: "userid", value: userNameController.text);
         await secureStorage.write(key: "auth_token", value: user.token);
-
-        //logger.e("token: ${user.token} ");
-
         return user;
       } else {
         logger.d('API Fehler: ${response.statusCode} - $apiUrl');
@@ -76,26 +72,18 @@ class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFb9d0e2),
+      backgroundColor: AppColors.white,
 
       body: SafeArea(
         child: Center(
           child: Column(
             children: [
-              const SizedBox(height: 100),
+              const SizedBox(height: 120),
 
               //Logo
-              Center(child: Image.asset('lib/images/Logo.png', height: 250)),
+              Center(child: Image.asset('lib/images/Logo.png', height: 182, width: 200,)),
 
-              const SizedBox(height: 15),
-
-              //Welcome
-              Text(
-                'Welcome!',
-                style: TextStyle(color: Color(0xFF16425B), fontSize: 20),
-              ),
-
-              const SizedBox(height: 25),
+              const SizedBox(height: 40),
 
               //Username Textfiled
               MyTextField(
@@ -104,7 +92,7 @@ class LoginPage extends StatelessWidget {
                 obscureText: false,
               ),
 
-              const SizedBox(height: 10),
+              const SizedBox(height: 16),
 
               //Passwort textfield
               MyTextField(
@@ -113,7 +101,7 @@ class LoginPage extends StatelessWidget {
                 obscureText: true,
               ),
 
-              const SizedBox(height: 25),
+              const SizedBox(height: 16),
 
               //Sign in Button
               MyButton(
@@ -129,7 +117,7 @@ class LoginPage extends StatelessWidget {
                       MaterialPageRoute(
                         builder:
                             (context) =>
-                                HomePage(userId: userNameController.text),
+                                Navigation(userId: userNameController.text, token: userLogin.token),
                       ),
                     );
                   } else {
@@ -140,39 +128,34 @@ class LoginPage extends StatelessWidget {
                     );
                   }
                 },
-                buttonText: "Sign In",
-                fontSize: 16,
-                backgroundColor: Color(0xFF3A7CA5),
+                buttonText: "Login",
+                fontSize: 24,
+                backgroundColor: AppColors.blue,
               ),
 
-              const SizedBox(height: 150),
+              const SizedBox(height: 80),
+
+              // Registrieren
+              Text(
+                'Noch nicht dabei ? -  Registrieren dich jetzt ! ',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: AppColors.greyTextColor, fontSize: 14),
+              ),
+
+              const SizedBox(height: 16),
 
               //Register
               MyButton(
                 onTap: () async {
                   final navigator = Navigator.of(context);
-                  final messenger = ScaffoldMessenger.of(context);
 
-                  //bool loginSuccess = await handleLogin(context);
-                  UserLogin? userLogin = await handleLogin(context);
-
-                  if (userLogin != null && userLogin.success) {
-                    navigator.pushReplacement(
-                      MaterialPageRoute(builder: (context) => RegisterPage()),
-                    );
-                  } else {
-                    messenger.showSnackBar(
-                      const SnackBar(
-                        content: Text('Login failed. Please try again.'),
-                      ),
-                    );
-                  }
+                  navigator.pushReplacement(
+                    MaterialPageRoute(builder: (context) => RegisterPage()),
+                  );
                 },
-                buttonText: "Register here!",
-                fontSize: 14,
-                margin: const EdgeInsets.symmetric(horizontal: 10),
-                padding: const EdgeInsets.all(10),
-                backgroundColor: Color(0xFF3A7CA5),
+                buttonText: "Register Now",
+                fontSize: 24,
+                backgroundColor: AppColors.blue,
               ),
             ],
           ),

@@ -14,8 +14,8 @@ class MyButton extends StatelessWidget {
      required this.onTap,
       required this.buttonText,
       required this.fontSize,
-      this.margin = const EdgeInsets.symmetric(horizontal: 25),
-      this.padding = const EdgeInsets.all(25),
+      this.margin = const EdgeInsets.symmetric(horizontal: 24),
+      this.padding = const EdgeInsets.all(12),
       this.backgroundColor = Colors.black, 
       });
 
@@ -28,7 +28,7 @@ class MyButton extends StatelessWidget {
         margin: margin,
         decoration: BoxDecoration(
           color: backgroundColor,
-          borderRadius: BorderRadius.circular(8)
+          borderRadius: BorderRadius.circular(16)
         ),
         child: Center(
         child: Text(

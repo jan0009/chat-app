@@ -1,5 +1,5 @@
 class ApiConstants {
-  // Constanten fÃ¼r Api Requests
+  // Constanten für Api Requests
   static const String baseUrl =
       "https://www2.hs-esslingen.de/~melcher/map/chat/api?request=";
   static const String postUrl =
@@ -12,9 +12,10 @@ class ApiConstants {
   static const String postmessage = "postmessage";
   static const String getPhoto = "getphoto";
 
-  static const String getprofiles ="getprofiles";
-  static const String createchat ="createchat";
+  static const String getprofiles = "getprofiles";
+  static const String createchat = "createchat";
 
   static const String validateToken = "validatetoken";
+  static const String joinChat = "joinchat";
+  static const String leaveChat = "leavechat";
 }
-

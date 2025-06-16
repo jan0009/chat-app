@@ -13,8 +13,8 @@ class PreviewPage extends StatefulWidget {
 
   const PreviewPage({
     super.key,
-     required this.imageBytes,
-     required this.chatId
+    required this.imageBytes,
+    required this.chatId
   });
 
   @override
@@ -84,27 +84,62 @@ Future<void> sendMessageToServerWithImage(String messageText, Uint8List imageByt
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Bildvorschau"),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.send),
-            onPressed: _send,
-          )
-        ],
-      ),
-      body: Column(
+      body: Stack(
         children: [
-          Expanded(
-            child: Image.memory(widget.imageBytes, fit: BoxFit.cover),
+          Positioned.fill(
+            child: Image.memory(
+              widget.imageBytes,
+              fit: BoxFit.cover,
+            ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: TextField(
-              controller: _textController,
-              decoration: const InputDecoration(
-                labelText: "Nachricht hinzufügen...",
-                border: OutlineInputBorder(),
+
+          Positioned(
+            top: 64,
+            left: 24,
+            child: SizedBox(
+              width: 56,  
+              height: 56, 
+              child: FloatingActionButton(
+                heroTag: "close_btn",
+                onPressed: () => Navigator.pop(context),
+                child: const Icon(Icons.close, size: 32),
+              ),
+            ),
+          ),
+
+          // Eingabebereich im Vordergrund unten
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(40, 16, 20, 48),
+              decoration: const BoxDecoration(
+                color: Color(0xFF2F6690),
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(24),
+                  topRight: Radius.circular(24),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _textController,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                      ),
+                      decoration: const InputDecoration(
+                        hintText: "Message",
+                        hintStyle: TextStyle(color: Colors.white),
+                        border: InputBorder.none,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.send, color: Colors.white),
+                    onPressed: _send,
+                  ),
+                ],
               ),
             ),
           ),

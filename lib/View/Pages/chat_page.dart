@@ -1,10 +1,9 @@
 import 'dart:async';
-
+import 'package:chatapp/Shared/Constants/theme.dart';
 import 'package:chatapp/View/Pages/camera_page.dart';
-import 'package:chatapp/components/My_app_bar.dart';
+import 'package:chatapp/View/Pages/settings_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
-import 'package:chatapp/View/Pages/home_page.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:chatapp/Shared/Constants/ApiConstants.dart';
@@ -12,7 +11,6 @@ import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import '../../View/Pages/invite_page.dart';
 
 class ChatPage extends StatefulWidget {
   final String chatId;
@@ -37,13 +35,13 @@ class ChatPageState extends State<ChatPage> {
   final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
   final logger = Logger();
 
-  String? _token; 
+  String? _token;
   bool _isLoadingToken = true;
 
   @override
   void initState() {
     super.initState();
-    fetchMessagesFromServer(); 
+    fetchMessagesFromServer();
     _loadToken(); // Lädt den Token
 
     _refreshTimer = Timer.periodic(
@@ -59,11 +57,9 @@ class ChatPageState extends State<ChatPage> {
   }
 
   void goToHome(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => HomePage(userId: widget.userId)),
-    );
+    Navigator.pop(context);
   }
+
   Future<void> _loadToken() async {
     final t = await secureStorage.read(key: "auth_token");
     setState(() {
@@ -71,22 +67,25 @@ class ChatPageState extends State<ChatPage> {
       _isLoadingToken = false;
     });
   }
-  Future<void> _goToInvite() async {
-  // Falls der Token noch lädt oder nicht vorhanden ist, abbrechen
-  if (_isLoadingToken || _token == null) return;
 
-  if (!mounted) return;        // Safety-check
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (_) => InvitePage(
-        token: _token!,        // bereits aus SecureStorage geladen
-        chatId: widget.chatId,
-        userId: widget.userId,
+  Future<void> _goToSettings() async {
+    // Falls der Token noch lädt oder nicht vorhanden ist, abbrechen
+    if (_isLoadingToken || _token == null) return;
+
+    if (!mounted) return; // Safety-check
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder:
+            (_) => ChatSettings(
+              token: _token!, // bereits aus SecureStorage geladen
+              chatId: widget.chatId,
+              userId: widget.userId,
+              chatName: widget.chatName,
+            ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   Future<void> fetchMessagesFromServer() async {
     const String apiUrl = '${ApiConstants.baseUrl}getmessages';
@@ -113,7 +112,8 @@ class ChatPageState extends State<ChatPage> {
             final senderId = msg['userid'].toString();
             final isOwnMessage = senderId == widget.userId;
             final photoId = msg['photoid'];
-            final text = msg['text'].toString();
+            final rawText = msg['text'];
+            final String? text = rawText is String && rawText.trim().isNotEmpty ? rawText.trim() : null;
             final createdAt =
                 DateFormat(
                   "yyyy-MM-dd_HH-mm-ss",
@@ -136,12 +136,12 @@ class ChatPageState extends State<ChatPage> {
                   name: "Bild",
                   size: 0,
                   uri: photoUrl,
-                  metadata: {'text': text},
+                  metadata: text != null && text.toString().trim().isNotEmpty ? {'text': text} : null, 
                 ),
               );
             }
 
-            if (text.isNotEmpty) {
+            if (text != null && text.toString().trim().isNotEmpty ) {
               loadedMessages.add(
                 types.TextMessage(
                   author: author,
@@ -224,43 +224,67 @@ class ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
-    
     return Scaffold(
-      appBar: CustomAppBar(
-        title: '${widget.chatName} ',//${widget.chatId}
-        onBackPressed: () => goToHome(context),
+      appBar: AppBar(
+        title: Text(
+          widget.chatName,
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: AppColors.greyTextColor,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: AppColors.lightgreyTextBox,
+        scrolledUnderElevation: 0,  // 👉 wichtig
+        elevation: 0,   
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back,
+            size: 32,
+            color: AppColors.greyTextColor,
+          ),
+          onPressed: () => goToHome(context),
+        ),
+        actions: [
+          IconButton(
+            tooltip: 'Chat Einstellungen',
+            icon: Icon(
+              Icons.more_vert,
+              size: 32,
+              color: AppColors.greyTextColor,
+            ),
+            onPressed: _goToSettings
+          ),
+        ],
       ),
-
-      backgroundColor: const Color(0xFFb9d0e2),
 
       body: Chat(
         messages: _messages,
-        onAttachmentPressed: _handleAttachmentPressed,
+        onAttachmentPressed: () => _handleImageSelection(context),
         onSendPressed: _handleSendPressed,
         user: types.User(id: widget.userId),
         showUserNames: true,
         showUserAvatars: false,
         theme: DefaultChatTheme(
           primaryColor: const Color(0xFF3A7CA5),
-          backgroundColor: const Color(0xFFD9DCD6),
+          backgroundColor: AppColors.white,
           inputBackgroundColor: const Color(0xFF2F6690),
           receivedMessageBodyTextStyle: const TextStyle(
-            color: Color(0xFF16425B),
+            color: AppColors.greyTextColor,
+            fontWeight: FontWeight.w600,
           ),
-          sentMessageBodyTextStyle: const TextStyle(color: Colors.white),
+          sentMessageBodyTextStyle: const TextStyle(
+            color: AppColors.white,
+            fontWeight: FontWeight.w600,
+          ),
+          attachmentButtonIcon: Icon(
+            Icons.photo_camera_rounded,
+            color: Colors.white,
+            size: 40,
+          ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-      tooltip: 'Benutzer einladen',
-      backgroundColor: const Color(0xFF3A7CA5),
-      foregroundColor: Colors.white,
-      onPressed: _goToInvite,
-      child: const Icon(Icons.person_add),
-    
-  ),
-
-    
-
     );
   }
 
@@ -268,70 +292,12 @@ class ChatPageState extends State<ChatPage> {
     sendMessageToServer(message.text);
   }
 
-    void _handleAttachmentPressed() {
-    showModalBottomSheet<void>(
-      context: context,
-      builder: (BuildContext context) => SafeArea(
-        child: SizedBox(
-          height: 200,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              const SizedBox(height: 12), 
-
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  _handleImageSelection(context);
-                },
-                child: const Align(
-                  alignment: AlignmentDirectional.center,
-                  child: Text(
-                    'Photo',
-                    style: TextStyle(fontSize: 18),),
-                ),
-              ),
-              const SizedBox(height: 8), // Abstand
-
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  _handleFileSelection();
-                },
-                child: const Align(
-                  alignment: AlignmentDirectional.center,
-                  child: Text(
-                    'File',
-                    style: TextStyle(fontSize: 18),),
-                ),
-              ),
-              const SizedBox(height: 8), 
-
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Align(
-                  alignment: AlignmentDirectional.center,
-                  child: Text(
-                    'Cancel',
-                    style: TextStyle(fontSize: 18, color: Colors.redAccent)
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _handleFileSelection() async {
-   
-  }
-
-  void _handleImageSelection(BuildContext context) async {
-     Navigator.push(
+  void _handleImageSelection(BuildContext context) {
+    Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => CameraPage(chatId: widget.chatId)),
+      MaterialPageRoute(
+        builder: (context) => CameraPage(chatId: widget.chatId),
+      ),
     );
   }
 }

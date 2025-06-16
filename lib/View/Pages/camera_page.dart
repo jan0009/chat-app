@@ -29,7 +29,7 @@ class _CameraPageState extends State<CameraPage> {
 
   Future<void> initCamera() async {
     final cameras = await availableCameras();
-    _controller = CameraController(cameras[0], ResolutionPreset.high);
+    _controller = CameraController(cameras[0], ResolutionPreset.low);
     await _controller.initialize();
     setState(() {
       _isInitialized = true;
@@ -48,24 +48,31 @@ class _CameraPageState extends State<CameraPage> {
           Positioned.fill(child: CameraPreview(_controller)),
           // 🔘 Zurück-Button oben links
           Positioned(
-            top: 40,
-            left: 20,
-            child: FloatingActionButton.small(
-              heroTag: "close_btn",
-              onPressed: () => Navigator.pop(context),
-              child: const Icon(Icons.close),
+            top: 64,
+            left: 24,
+            child: SizedBox(
+              width: 56,  
+              height: 56, 
+              child: FloatingActionButton(
+                heroTag: "close_btn",
+                onPressed: () => Navigator.pop(context),
+                child: const Icon(Icons.close, size: 32),
+              ),
             ),
           ),
-          // 📷 Foto aufnehmen Button unten mittig
           Positioned(
-            bottom: 40,
+            bottom: 80,
             left: 0,
             right: 0,
             child: Center(
-              child: FloatingActionButton(
-                heroTag: "capture_btn",
-                onPressed: _takePicture,
-                child: const Icon(CupertinoIcons.camera),
+              child: SizedBox(
+                width: 64,  
+                height: 64,
+                child: FloatingActionButton(
+                  heroTag: "capture_btn",
+                  onPressed: _takePicture,
+                  child: const Icon(CupertinoIcons.camera, size: 40),
+                ),
               ),
             ),
           ),

@@ -1,6 +1,8 @@
 import 'package:chatapp/Shared/Constants/ApiConstants.dart';
+import 'package:chatapp/Shared/Constants/theme.dart';
 import 'package:chatapp/View/Entities/user_register.dart';
 import 'package:chatapp/View/Pages/home_page.dart';
+import 'package:chatapp/View/Pages/login.dart';
 import 'package:flutter/material.dart';
 import 'package:chatapp/components/MyButton.dart';
 import 'package:chatapp/components/MyTextField.dart';
@@ -69,23 +71,32 @@ class RegisterPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFb9d0e2),
-      appBar: AppBar(title: Text('Home'), backgroundColor: Color(0xFFb9d0e2)),
+      backgroundColor: AppColors.white,
       body: SafeArea(
         child: Center(
           child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 10),
+              Padding(
+                padding: const EdgeInsets.only(top: 16.0, left: 16.0),
+                child: IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  iconSize: 32.0, 
+                  color: AppColors.iconBlack,
+                  onPressed: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => LoginPage()),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: 60),
 
               //Logo
-              Center(child: Image.asset('lib/images/Logo.png', height: 250)),
+              Center(child: Image.asset('lib/images/Logo.png', height: 182, width: 200,)),
 
-              Text(
-                'Register',
-                style: TextStyle(color: Color(0xFF16425B), fontSize: 20),
-              ),
-
-              const SizedBox(height: 25),
+              const SizedBox(height: 40),
 
               //Username Textfiled
               MyTextField(
@@ -120,7 +131,7 @@ class RegisterPage extends StatelessWidget {
                 obscureText: false,
               ),
 
-              const SizedBox(height: 25),
+              const SizedBox(height: 40),
 
               //Sign in Button
               MyButton(
@@ -148,8 +159,8 @@ class RegisterPage extends StatelessWidget {
                   }
                 },
                 buttonText: "Register",
-                fontSize: 16,
-                backgroundColor: Color(0xFF3A7CA5),
+                fontSize: 24,
+                backgroundColor: AppColors.blue,
               ),
             ],
           ),
