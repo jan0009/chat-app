@@ -44,6 +44,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_launcher_icons: ^0.14.1
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -56,6 +57,14 @@ dev_dependencies:
 # following page: https://dart.dev/tools/pub/pubspec
 
 # The following section is specific to Flutter packages.
+flutter_launcher_icons:
+  android: "ic_launcher"
+  ios: true
+  image_path: "lib/images/Chatalyst-Icon.png"  
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "lib/images/Chatalyst-Icon.png"
+  adaptive_icon_foreground_inset: 24
+
 flutter:
 
   # The following line ensures that the Material Icons font is
